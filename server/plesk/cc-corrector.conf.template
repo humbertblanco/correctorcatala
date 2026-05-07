@@ -95,9 +95,18 @@ server {
         proxy_connect_timeout 5s;
     }
 
-    # Tiny landing page for humans who hit the bare host.
+    # Public landing page + extension download served as static files.
+    # Files live at /opt/corrector/landing/ on the VPS (sync'd from repo).
     location / {
-        default_type text/html;
-        return 200 '<!doctype html><meta charset=utf-8><title>Corrector Catala</title><body style="font-family:system-ui;max-width:520px;margin:64px auto;padding:0 16px;color:#222"><h1>Corrector Catala</h1><p>API del corrector ortografic i gramatical en catala. Pensada per a us programatic des de l\'extensio de Chrome.</p><p>Documentacio: <a href="https://github.com/humbertblanco/correctorcatala">github.com/humbertblanco/correctorcatala</a></p></body>';
+        root /opt/corrector/landing;
+        index index.html;
+        try_files $uri $uri/ =404;
+
+        # Aggressive cache for static, except index.html (so updates appear fast).
+        location ~* \.(zip|svg|png|css|js)$ {
+            root /opt/corrector/landing;
+            expires 7d;
+            add_header Cache-Control "public, max-age=604800";
+        }
     }
 }

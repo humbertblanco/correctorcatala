@@ -1,0 +1,541 @@
+<!doctype html>
+<html lang="ca">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Corrector Català — correcció ortogràfica i gramatical lliure</title>
+<meta name="description" content="Substitut gratuït i autohostat de l'extensió de LanguageTool: correcció ortogràfica i gramatical en català (estàndard, valencià, balear) i castellà. Codi obert AGPLv3.">
+<meta property="og:title" content="Corrector Català">
+<meta property="og:description" content="Correcció ortogràfica i gramatical, lliure i sense subscripcions, al teu navegador.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://corrector.damosenelblanco.com/">
+<meta name="theme-color" content="#c8102e">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<style>
+:root {
+  --red: #c8102e;
+  --red-dark: #a30d24;
+  --red-soft: #fae6e8;
+  --bg: #fbfaf6;
+  --paper: #ffffff;
+  --paper-warm: #fefdf9;
+  --ink: #1a1a1a;
+  --ink-soft: #4a4a4a;
+  --muted: #6b6b6b;
+  --line: #e8e3da;
+  --line-strong: #d8d3ca;
+  --code-bg: #f0ede5;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', system-ui, sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--ink);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+}
+main { max-width: 780px; margin: 0 auto; padding: 56px 24px 80px; }
+h1, h2, h3 { line-height: 1.18; letter-spacing: -0.015em; }
+h1 { font-size: clamp(40px, 7vw, 64px); margin: 0 0 16px; font-weight: 800; }
+h2 { font-size: 30px; margin: 64px 0 18px; font-weight: 700; }
+h3 { font-size: 18px; margin: 0 0 8px; font-weight: 600; }
+p { margin: 0 0 14px; }
+
+.wave {
+  text-decoration: underline wavy var(--red) 3px;
+  text-decoration-skip-ink: none;
+  text-underline-offset: 10px;
+}
+
+.lead {
+  font-size: clamp(18px, 2.4vw, 22px);
+  color: var(--ink-soft);
+  margin: 0 0 12px;
+  line-height: 1.45;
+}
+.pitch { color: var(--muted); margin: 0 0 36px; }
+.muted { color: var(--muted); }
+
+.cta-row { display: flex; gap: 12px; flex-wrap: wrap; margin: 28px 0 8px; }
+.btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 13px 22px;
+  font-weight: 600; font-size: 15px;
+  text-decoration: none;
+  border-radius: 8px;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: 0.15s;
+  font-family: inherit;
+}
+.btn-primary { background: var(--red); color: white; border-color: var(--red); }
+.btn-primary:hover { background: var(--red-dark); border-color: var(--red-dark); }
+.btn-ghost { background: transparent; color: var(--ink); border-color: var(--line-strong); }
+.btn-ghost:hover { border-color: var(--red); color: var(--red); }
+.btn-download { font-size: 17px; padding: 16px 26px; }
+.btn-download::before { content: "⬇"; font-size: 1.1em; }
+
+section { margin-top: 64px; }
+
+.label {
+  display: block;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 6px;
+}
+
+.demo {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 18px;
+  margin-top: 8px;
+}
+@media (min-width: 760px) {
+  .demo { grid-template-columns: 1fr 1fr; }
+}
+
+#demo-text {
+  width: 100%;
+  min-height: 140px;
+  padding: 14px;
+  border: 1.5px solid var(--line-strong);
+  border-radius: 8px;
+  background: var(--paper);
+  font-family: inherit;
+  font-size: 15px;
+  line-height: 1.55;
+  resize: vertical;
+  color: var(--ink);
+}
+#demo-text:focus {
+  outline: none;
+  border-color: var(--red);
+  box-shadow: 0 0 0 3px var(--red-soft);
+}
+
+#demo-variant {
+  display: block;
+  margin-top: 10px;
+  padding: 8px 12px;
+  border: 1.5px solid var(--line-strong);
+  border-radius: 6px;
+  background: var(--paper);
+  font-family: inherit;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.result-box {
+  min-height: 140px;
+  padding: 14px;
+  border: 1.5px solid var(--line);
+  border-radius: 8px;
+  background: var(--paper-warm);
+  font-family: inherit;
+  font-size: 15px;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  line-height: 1.7;
+  color: var(--ink);
+}
+.result-box .mark {
+  text-decoration: underline wavy var(--red) 2.5px;
+  text-decoration-skip-ink: none;
+  text-underline-offset: 3px;
+  cursor: pointer;
+  border-radius: 2px;
+  transition: background 0.1s;
+}
+.result-box .mark:hover { background: var(--red-soft); }
+.result-box .mark.active { background: var(--red-soft); }
+
+.status { font-size: 14px; margin-top: 12px; color: var(--muted); }
+.status .count { color: var(--ink); font-weight: 600; }
+
+.match-list {
+  list-style: none;
+  padding: 0;
+  margin: 12px 0 0;
+  font-size: 14px;
+}
+.match-list li {
+  padding: 10px 14px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--paper);
+  margin-bottom: 8px;
+  transition: border-color 0.15s;
+}
+.match-list li.active { border-color: var(--red); box-shadow: 0 0 0 2px var(--red-soft); }
+.match-list .word {
+  color: var(--red);
+  font-weight: 700;
+  margin-right: 6px;
+}
+.match-list .desc { color: var(--ink-soft); }
+.repl-row { margin-top: 6px; display: flex; flex-wrap: wrap; gap: 4px; }
+.repl-btn {
+  display: inline-block;
+  padding: 3px 10px;
+  background: var(--red);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+}
+.repl-btn:hover { background: var(--red-dark); }
+.no-replacements { color: var(--muted); font-style: italic; font-size: 12.5px; margin-top: 6px; }
+
+.cards {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+  margin-top: 8px;
+}
+@media (min-width: 720px) { .cards { grid-template-columns: repeat(3, 1fr); } }
+.card {
+  padding: 22px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--paper);
+}
+.card h3 { color: var(--red); }
+
+.install { background: var(--paper); padding: 32px; border-radius: 12px; border: 1px solid var(--line); }
+.install h2 { margin-top: 0; }
+.install-cta { margin: 20px 0 28px; }
+
+.steps {
+  counter-reset: step;
+  list-style: none;
+  padding: 0;
+  margin: 24px 0 8px;
+}
+.steps li {
+  counter-increment: step;
+  padding: 14px 16px 14px 56px;
+  margin-bottom: 8px;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  position: relative;
+  font-size: 15px;
+}
+.steps li::before {
+  content: counter(step);
+  position: absolute;
+  left: 16px;
+  top: 14px;
+  width: 28px;
+  height: 28px;
+  background: var(--red);
+  color: white;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.note {
+  background: var(--red-soft);
+  border-left: 3px solid var(--red);
+  padding: 12px 16px;
+  margin-top: 24px;
+  border-radius: 0 6px 6px 0;
+  font-size: 14.5px;
+}
+
+code {
+  font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  font-size: 0.9em;
+  background: var(--code-bg);
+  padding: 2px 6px;
+  border-radius: 3px;
+}
+pre {
+  background: #1a1a1a;
+  color: #f5f5f5;
+  padding: 18px 20px;
+  border-radius: 8px;
+  overflow-x: auto;
+  font-size: 13.5px;
+  line-height: 1.55;
+  margin: 16px 0;
+}
+pre code { background: transparent; padding: 0; color: inherit; font-size: 1em; }
+
+a { color: var(--red); text-decoration-thickness: 1.5px; text-underline-offset: 2px; }
+a:hover { color: var(--red-dark); }
+
+footer {
+  margin-top: 96px;
+  padding-top: 28px;
+  border-top: 1px solid var(--line);
+  font-size: 14px;
+  color: var(--muted);
+}
+.footer-links { display: flex; flex-wrap: wrap; gap: 6px 16px; align-items: center; }
+.footer-links a { color: var(--muted); text-decoration: none; }
+.footer-links a:hover { color: var(--red); }
+.footer-sep { color: var(--line-strong); }
+.agraiments { margin-top: 14px; font-size: 13px; line-height: 1.6; }
+</style>
+</head>
+<body>
+<main>
+
+  <header class="hero">
+    <h1>Corrector <span class="wave">Català</span></h1>
+    <p class="lead">Correcció ortogràfica i gramatical, gratuïta i lliure, al teu navegador.</p>
+    <p class="pitch">Substitueix l'extensió de LanguageTool que va passar a Premium el gener de 2025. Codi obert, sense subscripcions, sense rastrejament.</p>
+    <div class="cta-row">
+      <a href="#instal" class="btn btn-primary">Instal·la l'extensió</a>
+      <a href="#prova" class="btn btn-ghost">Prova-ho aquí ↓</a>
+    </div>
+  </header>
+
+  <section id="prova">
+    <h2>Prova-ho ara mateix</h2>
+    <p class="muted">Escriu o enganxa un text amb errors. Es comprova automàticament després de 0,7 s d'inactivitat. Mateix motor i mateixes regles que l'extensió.</p>
+
+    <div class="demo">
+      <div>
+        <span class="label">Text</span>
+        <textarea id="demo-text" spellcheck="false">Aixo es una prova per veure si el corrector troba errors. La gramatica catalana te moltes regles, pero amb una mica de practica es pot dominar.</textarea>
+        <select id="demo-variant" aria-label="Variant del corrector">
+          <option value="ca-ES">Català (general)</option>
+          <option value="ca-ES-valencia">Valencià</option>
+          <option value="ca-ES-balear">Balear</option>
+          <option value="es">Castellà</option>
+        </select>
+      </div>
+      <div>
+        <span class="label">Resultat</span>
+        <div id="demo-result" class="result-box" aria-live="polite">Carregant…</div>
+        <div id="demo-status" class="status"></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Per què existeix</h2>
+    <p>L'extensió oficial de <a href="https://languagetool.org">LanguageTool</a> va passar a <strong>Premium-only</strong> el gener de 2025: després d'un trial de 14 dies els subratllats desapareixen si no pagues. Per a sis milions d'usuaris — i pràcticament tots els catalanoparlants que la feien servir — això va ser un cop dur.</p>
+    <p>Però el motor és <strong>LGPL</strong> i les regles catalanes són excel·lents — les manté <a href="https://softcatala.org">Softcatalà</a> i la comunitat. Aquest projecte exposa aquell motor lliure sobre un servidor propi, autohostable, i hi afegeix una extensió Chrome MV3 nova, gratuïta per sempre.</p>
+  </section>
+
+  <section>
+    <h2>Característiques</h2>
+    <div class="cards">
+      <div class="card">
+        <h3>Tres variants de català</h3>
+        <p>Estàndard, valencià i balear, amb detecció automàtica de la variant pel text.</p>
+      </div>
+      <div class="card">
+        <h3>Castellà també</h3>
+        <p>Molts catalans escrivim en les dues llengües. L'extensió ho detecta i corregeix automàticament.</p>
+      </div>
+      <div class="card">
+        <h3>Privadesa real</h3>
+        <p>El text només va al servidor que tu trïis. Sense analítiques, sense cookies, sense rastrejadors.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="instal" class="install">
+    <h2>Instal·la l'extensió</h2>
+    <p class="muted">Encara no és al Chrome Web Store (en procés). Mentre la publiquem, instal·la-la manualment en 5 passos. <strong>És totalment segur</strong>: el codi és obert i auditable.</p>
+
+    <div class="install-cta">
+      <a href="/extension.zip" class="btn btn-primary btn-download" download>Descarrega corrector-catala.zip</a>
+    </div>
+
+    <ol class="steps">
+      <li><strong>Descomprimeix</strong> el ZIP en una carpeta on no la moguis (per exemple <code>~/Documents/corrector-catala/</code>).</li>
+      <li>Obre <code>chrome://extensions/</code> al navegador <em>(Chrome, Edge, Brave, Vivaldi…)</em>.</li>
+      <li>Activa <strong>Mode desenvolupador</strong> amb l'interruptor de la cantonada superior dreta.</li>
+      <li>Clica <strong>Carrega sense empaquetar</strong> i selecciona la carpeta que has descomprimit.</li>
+      <li>Fixa la icona del corrector a la barra d'eines clicant el trencaclosques i el pin.</li>
+    </ol>
+
+    <p class="note">L'extensió ja apunta per defecte a <code>https://corrector.damosenelblanco.com</code>. Si vols autohostar el teu propi servidor, canvia l'adreça a la pàgina d'opcions.</p>
+  </section>
+
+  <section>
+    <h2>Per a desenvolupadors</h2>
+    <p>L'API és <strong>compatible amb la de LanguageTool</strong> (<a href="https://languagetool.org/http-api/">v2/check</a>). Pots cridar-la des de qualsevol llenguatge:</p>
+    <pre><code>curl -X POST https://corrector.damosenelblanco.com/v2/check \
+  --data-urlencode "text=Aixo es una prova" \
+  --data-urlencode "language=ca-ES"</code></pre>
+    <p>Variants suportades: <code>ca-ES</code>, <code>ca-ES-valencia</code>, <code>ca-ES-balear</code>, <code>es</code>. Límit de 30 peticions/min per IP. Per a ús intensiu, <a href="https://github.com/humbertblanco/correctorcatala/blob/main/docs/INSTALL_SERVER.md">autohosta el teu propi servidor</a> (Docker + nginx, 5 minuts).</p>
+  </section>
+
+  <footer>
+    <div class="footer-links">
+      <a href="https://github.com/humbertblanco/correctorcatala">Codi font (GitHub)</a>
+      <span class="footer-sep">·</span>
+      <a href="https://github.com/humbertblanco/correctorcatala/blob/main/docs/PRIVACY.md">Privadesa</a>
+      <span class="footer-sep">·</span>
+      <a href="https://github.com/humbertblanco/correctorcatala/blob/main/docs/INSTALL_SERVER.md">Autohostatge</a>
+      <span class="footer-sep">·</span>
+      <a href="https://liberapay.com/correctorcatala">Donacions</a>
+    </div>
+    <p class="agraiments">Construït sobre <a href="https://languagetool.org">LanguageTool</a> (LGPL 2.1). Regles catalanes mantingudes per <a href="https://softcatala.org">Softcatalà</a> i la comunitat. Llicència del projecte: <a href="https://github.com/humbertblanco/correctorcatala/blob/main/LICENSE">AGPLv3</a>.</p>
+  </footer>
+
+</main>
+
+<script>
+const $ = id => document.getElementById(id);
+const ta = $('demo-text');
+const sel = $('demo-variant');
+const out = $('demo-result');
+const status = $('demo-status');
+
+let timer = 0;
+let lastReq = 0;
+let currentMatches = [];
+
+const escapeMap = { '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;' };
+const escape = s => s.replace(/[<>&"]/g, c => escapeMap[c]);
+
+async function check() {
+  const text = ta.value;
+  if (text.trim().length < 4) {
+    out.innerHTML = '<span class="muted">Escriu alguna cosa…</span>';
+    status.textContent = '';
+    currentMatches = [];
+    return;
+  }
+  const reqId = ++lastReq;
+  status.textContent = 'Comprovant…';
+
+  const body = new URLSearchParams();
+  body.set('text', text);
+  body.set('language', sel.value);
+
+  let resp;
+  try {
+    resp = await fetch('/v2/check', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body
+    });
+  } catch (err) {
+    if (reqId === lastReq) status.textContent = 'Error de xarxa: ' + err.message;
+    return;
+  }
+  if (reqId !== lastReq) return;
+  if (resp.status === 429) {
+    status.textContent = 'Massa peticions. Torna-ho a provar en un moment.';
+    return;
+  }
+  if (!resp.ok) {
+    status.textContent = 'Error HTTP ' + resp.status;
+    return;
+  }
+  const data = await resp.json();
+  if (reqId !== lastReq) return;
+  render(text, data.matches || []);
+}
+
+function render(text, matches) {
+  if (matches.length === 0) {
+    out.innerHTML = '<span class="muted">✓ Sense errors detectats.</span>';
+    status.textContent = '';
+    currentMatches = [];
+    return;
+  }
+
+  // De-overlap: keep the earliest non-overlapping match.
+  const sorted = [...matches].sort((a, b) => a.offset - b.offset || b.length - a.length);
+  const filtered = [];
+  let lastEnd = -1;
+  for (const m of sorted) {
+    if (m.offset >= lastEnd) {
+      filtered.push(m);
+      lastEnd = m.offset + m.length;
+    }
+  }
+  currentMatches = filtered;
+
+  let html = '';
+  let cursor = 0;
+  filtered.forEach((m, idx) => {
+    if (m.offset > cursor) html += escape(text.slice(cursor, m.offset));
+    const word = text.slice(m.offset, m.offset + m.length);
+    html += `<span class="mark" data-idx="${idx}" tabindex="0">${escape(word)}</span>`;
+    cursor = m.offset + m.length;
+  });
+  if (cursor < text.length) html += escape(text.slice(cursor));
+  out.innerHTML = html;
+
+  const items = filtered.map((m, idx) => {
+    const word = text.slice(m.offset, m.offset + m.length);
+    const reps = m.replacements.slice(0, 5);
+    const buttons = reps.length
+      ? `<div class="repl-row">${reps.map(r => `<button class="repl-btn" data-idx="${idx}" data-val="${escape(r.value)}">${escape(r.value)}</button>`).join('')}</div>`
+      : '<div class="no-replacements">Sense suggeriments automàtics</div>';
+    return `<li data-idx="${idx}"><span class="word">${escape(word)}</span><span class="desc">${escape(m.shortMessage || m.message)}</span>${buttons}</li>`;
+  }).join('');
+
+  const n = filtered.length;
+  status.innerHTML = `<span class="count">${n}</span> ${n === 1 ? 'error trobat' : 'errors trobats'}<ul class="match-list">${items}</ul>`;
+
+  // Wire up replacement buttons
+  status.querySelectorAll('.repl-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const idx = +btn.dataset.idx;
+      const val = btn.dataset.val;
+      const m = currentMatches[idx];
+      if (!m) return;
+      const t = ta.value;
+      ta.value = t.slice(0, m.offset) + val + t.slice(m.offset + m.length);
+      ta.focus();
+      check();
+    });
+  });
+
+  // Mark click → highlight matching list item
+  out.querySelectorAll('.mark').forEach(span => {
+    const handler = () => {
+      const idx = +span.dataset.idx;
+      out.querySelectorAll('.mark.active').forEach(s => s.classList.remove('active'));
+      status.querySelectorAll('.match-list li.active').forEach(s => s.classList.remove('active'));
+      span.classList.add('active');
+      const li = status.querySelector(`.match-list li[data-idx="${idx}"]`);
+      if (li) {
+        li.classList.add('active');
+        li.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      }
+    };
+    span.addEventListener('click', handler);
+    span.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handler(); } });
+  });
+}
+
+ta.addEventListener('input', () => {
+  clearTimeout(timer);
+  timer = setTimeout(check, 700);
+});
+sel.addEventListener('change', check);
+
+// Run once on load with the prefilled demo text
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', check);
+} else {
+  check();
+}
+</script>
+</body>
+</html>
