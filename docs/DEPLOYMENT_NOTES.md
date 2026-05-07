@@ -38,6 +38,7 @@
     └── scripts/                              # standalone helpers (no usats en aquest deploy)
 
 /etc/nginx/conf.d/
+├── aa-default-fallback.conf                  # default_server flag (vegeu "Gotcha #1")
 ├── cc-shared.conf                            # http-context: limit_req_zone cc_lt + map cc_cors_ok
 └── cc-corrector.conf                         # server { } per a corrector.damosenelblanco.com (renderitzat)
 
@@ -54,6 +55,21 @@ cc-lt   erikvl87/languagetool:latest       8010 (intern) / 8011 host      127.0.
 ```
 
 `docker compose up -d` (sense `--profile standalone`) → només `cc-lt` perquè els serveis nginx i certbot tenen `profiles: ["standalone"]`.
+
+## Gotchas i fixes
+
+### #1 — `default_server` cal explícit en un Plesk multi-tenant (incident 2026-05-07)
+
+**Què va passar:** quan vaig afegir `cc-corrector.conf` a `/etc/nginx/conf.d/`, el meu server block va passar a ser el "primer definit" per a `37.187.151.83:443 ssl`. Cap altre block té el flag `default_server` (Plesk hi confia per ordre de càrrega), així que nginx va començar a fer servir el meu bloc com a catch-all per a tots els hostnames sense match — incloent `server.estic.online` (el hostname de la màquina), trencant l'accés a la pàgina del panell Plesk i a vhosts Apache-only com `21botons.com`.
+
+**Solució:** afegit `/etc/nginx/conf.d/aa-default-fallback.conf` (fitxer al repo a `server/plesk/aa-default-fallback.conf`). És una còpia byte-per-byte de `/etc/nginx/plesk.conf.d/server.conf` amb el flag `default_server` afegit. El nom `aa-` el carrega abans que `cc-corrector.conf`, i el flag fa que nginx l'usi com a default explícit (regla guanya per damunt de l'ordre).
+
+**Verificació post-fix:** `damosenelblanco.com`, `clients.damosenelblanco.com`, `appmuseus.damosenelblanco.com`, `gaudi.damosenelblanco.com`, `afabaix.org`, `annaribas.cat`, `ajudem.cat` retornen 200 igual que abans. `server.estic.online` torna a redirigir al login del panell (303 → `/login.php` → `/login_up.php`). `corrector.damosenelblanco.com/healthz` continua tornant `ok`.
+
+**Risc futur:** si Plesk regenera mai el seu `server.conf` canviant el cert (`scfjcnnp04rhc3gctnlqlz`) o el comportament, cal re-sincronitzar la nostra còpia. Comprovar amb:
+```bash
+diff /etc/nginx/plesk.conf.d/server.conf /etc/nginx/conf.d/aa-default-fallback.conf
+```
 
 ## Decisions específiques d'aquesta producció
 
