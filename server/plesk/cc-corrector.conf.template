@@ -1,0 +1,103 @@
+# =============================================================================
+# Corrector Català — nginx server block override for a Plesk-managed VPS.
+#
+# Why an override and not "Additional nginx directives" in the Plesk panel?
+# The default Plesk template does NOT include `vhost_*nginx.conf` automatically;
+# the panel writes those files but only registers them in the DB (which the
+# template then reads). Driving that DB without the panel is brittle. So we
+# bypass it: a server block in /etc/nginx/conf.d/ that's loaded *before*
+# zz010_psa_nginx.conf (alphabetical), winning SNI for our hostname while
+# Plesk continues to manage TLS certificates and renewals at $CERT_FILE.
+#
+# Render this template via envsubst, then drop into /etc/nginx/conf.d/.
+# Variables: $DOMAIN, $LISTEN_IP, $CERT_FILE, $UPSTREAM_PORT, $LOG_DIR.
+# Use server/plesk/plesk-deploy.sh for a one-shot install.
+# =============================================================================
+
+# HTTP -> HTTPS, but keep ACME challenges working for cert renewal.
+server {
+    listen ${LISTEN_IP}:80;
+    server_name ${DOMAIN} www.${DOMAIN};
+
+    location ^~ /.well-known/acme-challenge/ {
+        root /var/www/vhosts/default/htdocs;
+        types { }
+        default_type text/plain;
+        satisfy any;
+        auth_basic off;
+        allow all;
+    }
+
+    location / {
+        return 301 https://$host$request_uri;
+    }
+}
+
+server {
+    listen ${LISTEN_IP}:443 ssl;
+    http2 on;
+    server_name ${DOMAIN} www.${DOMAIN};
+
+    ssl_certificate     "${CERT_FILE}";
+    ssl_certificate_key "${CERT_FILE}";
+
+    access_log ${LOG_DIR}/proxy_access_ssl_log;
+    error_log  ${LOG_DIR}/proxy_error_log warn;
+
+    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+    add_header X-Content-Type-Options    "nosniff"   always;
+    add_header X-Frame-Options           "DENY"      always;
+    add_header Referrer-Policy           "no-referrer" always;
+    server_tokens off;
+
+    client_max_body_size 256k;
+
+    # Mirror Plesk's ACME path so its built-in renewal keeps working.
+    location ^~ /.well-known/acme-challenge/ {
+        root /var/www/vhosts/default/htdocs;
+        types { }
+        default_type text/plain;
+        satisfy any;
+        auth_basic off;
+        allow all;
+    }
+
+    location = /healthz {
+        add_header Cache-Control "no-store" always;
+        default_type text/plain;
+        return 200 "ok\n";
+    }
+
+    location /v2/ {
+        if ($request_method = OPTIONS) {
+            add_header Access-Control-Allow-Origin "$cc_cors_ok" always;
+            add_header Access-Control-Allow-Methods "GET, POST, OPTIONS" always;
+            add_header Access-Control-Allow-Headers "Content-Type" always;
+            add_header Access-Control-Max-Age "86400" always;
+            add_header Vary "Origin" always;
+            add_header Content-Length 0;
+            return 204;
+        }
+
+        add_header Access-Control-Allow-Origin "$cc_cors_ok" always;
+        add_header Vary "Origin" always;
+
+        limit_req zone=cc_lt burst=10 nodelay;
+        limit_req_status 429;
+
+        proxy_pass http://127.0.0.1:${UPSTREAM_PORT}/v2/;
+        proxy_http_version 1.1;
+        proxy_set_header Host              $host;
+        proxy_set_header X-Real-IP         $remote_addr;
+        proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_read_timeout 30s;
+        proxy_connect_timeout 5s;
+    }
+
+    # Tiny landing page for humans who hit the bare host.
+    location / {
+        default_type text/html;
+        return 200 '<!doctype html><meta charset=utf-8><title>Corrector Catala</title><body style="font-family:system-ui;max-width:520px;margin:64px auto;padding:0 16px;color:#222"><h1>Corrector Catala</h1><p>API del corrector ortografic i gramatical en catala. Pensada per a us programatic des de l\'extensio de Chrome.</p><p>Documentacio: <a href="https://github.com/humbertblanco/correctorcatala">github.com/humbertblanco/correctorcatala</a></p></body>';
+    }
+}

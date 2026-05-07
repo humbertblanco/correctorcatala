@@ -1,0 +1,2 @@
+# nginx default.conf is rendered at container start from ../templates/api.conf.template via envsubst.
+# Drop any *.conf you place here at your own risk — the official nginx image auto-loads everything in this dir.

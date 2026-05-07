@@ -1,0 +1,38 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build outputs
+.output/
+.wxt/
+dist/
+*.zip
+*.crx
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# Editor / OS
+.DS_Store
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.example.json
+
+# Env
+.env
+.env.local
+.env.*.local
+server/.env
+
+# Server runtime data
+server/certbot/conf/*
+!server/certbot/conf/.gitkeep
+server/certbot/www/*
+!server/certbot/www/.gitkeep
+server/logs/
+
+# TypeScript
+*.tsbuildinfo

@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="ca">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Configuració – Corrector Català</title>
+    <link rel="stylesheet" href="../../assets/options.css" />
+  </head>
+  <body>
+    <main>
+      <header>
+        <img src="/icon-48.png" alt="" width="32" height="32" />
+        <h1 data-i18n="options_title"></h1>
+      </header>
+
+      <section>
+        <h2 data-i18n="options_server_section"></h2>
+        <label for="server-url" data-i18n="options_server_url"></label>
+        <input type="url" id="server-url" placeholder="https://corrector.damosenelblanco.com" />
+        <p class="help" data-i18n="options_server_url_help"></p>
+        <div class="actions-row">
+          <button id="test-server" data-i18n="options_server_test"></button>
+          <span id="test-result" class="test-result"></span>
+        </div>
+      </section>
+
+      <section>
+        <h2 data-i18n="options_dict_section"></h2>
+        <p class="help" data-i18n="options_dict_help"></p>
+        <textarea id="dict" rows="6" spellcheck="false"></textarea>
+      </section>
+
+      <section>
+        <h2 data-i18n="options_domains_section"></h2>
+        <p class="help" data-i18n="options_domains_help"></p>
+        <textarea id="domains" rows="6" spellcheck="false" placeholder="exemple.com&#10;mail.google.com"></textarea>
+      </section>
+
+      <div class="save-row">
+        <button id="save" class="primary" data-i18n="options_save"></button>
+        <span id="saved-flash" class="saved-flash" hidden data-i18n="options_saved"></span>
+      </div>
+    </main>
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>

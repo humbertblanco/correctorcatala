@@ -1,0 +1,75 @@
+name: corrector
+
+# Two deployment modes:
+#  1. Default (no profile): LT only, bound to 127.0.0.1:${HOST_PORT}.
+#     Use when an existing reverse proxy on the host (Plesk, Cloudflare Tunnel, Traefik, etc.)
+#     terminates TLS and proxies to localhost. See docs/INSTALL_SERVER.md.
+#
+#  2. --profile standalone: also runs nginx + certbot (TLS via Let's Encrypt webroot)
+#     for a clean VPS where Docker fully owns ports 80/443.
+
+services:
+  languagetool:
+    image: ${LANGUAGETOOL_IMAGE:-erikvl87/languagetool:latest}
+    container_name: cc-lt
+    restart: unless-stopped
+    ports:
+      - "${HOST_BIND:-127.0.0.1}:${HOST_PORT:-8010}:8010"
+    expose:
+      - "8010"
+    environment:
+      Java_Xms: ${JAVA_XMS:-1g}
+      Java_Xmx: ${JAVA_XMX:-4g}
+      langtool_maxTextLength: "50000"
+      langtool_maxCheckThreads: "8"
+      langtool_pipelineCaching: "true"
+      langtool_pipelinePrewarming: "true"
+      langtool_requestLimit: "120"
+      langtool_requestLimitPeriodInSeconds: "60"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8010/v2/languages | grep -q ca-ES || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+    networks:
+      - cc
+
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: cc-nginx
+    restart: unless-stopped
+    profiles: ["standalone"]
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./nginx/snippets:/etc/nginx/snippets:ro
+      - ./nginx/templates:/etc/nginx/templates:ro
+      - ./certbot/www:/var/www/certbot:ro
+      - ./certbot/conf:/etc/letsencrypt:ro
+      - ./logs/nginx:/var/log/nginx
+    environment:
+      DOMAIN: ${DOMAIN}
+    depends_on:
+      languagetool:
+        condition: service_healthy
+    networks:
+      - cc
+
+  certbot:
+    image: certbot/certbot:latest
+    container_name: cc-certbot
+    restart: unless-stopped
+    profiles: ["standalone"]
+    volumes:
+      - ./certbot/www:/var/www/certbot
+      - ./certbot/conf:/etc/letsencrypt
+    entrypoint: /bin/sh -c "trap exit TERM; while :; do certbot renew --webroot -w /var/www/certbot --quiet; sleep 12h & wait $${!}; done"
+    networks:
+      - cc
+
+networks:
+  cc:
+    name: corrector

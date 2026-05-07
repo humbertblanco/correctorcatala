@@ -1,0 +1,22 @@
+{
+  "name": "correctorcatala",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Corrector ortogràfic i gramatical en català, lliure i autohostat. Extensió de Chrome MV3 sobre LanguageTool.",
+  "license": "AGPL-3.0-or-later",
+  "packageManager": "pnpm@9.12.3",
+  "scripts": {
+    "dev": "pnpm -F extension dev",
+    "build": "pnpm -F extension build",
+    "zip": "pnpm -F extension zip",
+    "typecheck": "pnpm -F extension typecheck",
+    "lint": "pnpm -F extension lint"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/humbertblanco/correctorcatala"
+  },
+  "engines": {
+    "node": ">=20.10.0"
+  }
+}

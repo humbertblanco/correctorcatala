@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="ca">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>Corrector Català</title>
+    <link rel="stylesheet" href="../../assets/popup.css" />
+  </head>
+  <body>
+    <main>
+      <header>
+        <img src="/icon-32.png" alt="" width="20" height="20" />
+        <h1 data-i18n="popup_title"></h1>
+      </header>
+
+      <section class="row">
+        <label class="switch">
+          <input type="checkbox" id="enabled" />
+          <span class="slider"></span>
+          <span class="switch-label">
+            <span data-i18n="popup_enabled" class="when-on"></span>
+            <span data-i18n="popup_disabled" class="when-off"></span>
+          </span>
+        </label>
+      </section>
+
+      <section class="row">
+        <label for="variant" data-i18n="variant_label"></label>
+        <select id="variant">
+          <option value="auto" data-i18n="variant_auto"></option>
+          <option value="ca-ES" data-i18n="variant_central"></option>
+          <option value="ca-ES-valencia" data-i18n="variant_valencia"></option>
+          <option value="ca-ES-balear" data-i18n="variant_balear"></option>
+          <option value="es" data-i18n="variant_castella"></option>
+        </select>
+      </section>
+
+      <section class="row">
+        <button id="disable-domain" class="ghost" data-i18n="popup_toggle_domain"></button>
+      </section>
+
+      <footer>
+        <a href="#" id="open-options" data-i18n="popup_open_options"></a>
+        <span aria-hidden="true">·</span>
+        <a href="#" id="donate" data-i18n="popup_donate" target="_blank" rel="noopener"></a>
+      </footer>
+    </main>
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>

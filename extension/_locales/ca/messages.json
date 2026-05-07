@@ -1,0 +1,163 @@
+{
+  "extension_name": {
+    "message": "Corrector Català",
+    "description": "Nom de l'extensió"
+  },
+  "extension_description": {
+    "message": "Correcció ortogràfica i gramatical en català, lliure i sense subscripcions.",
+    "description": "Descripció breu a la fitxa del Web Store"
+  },
+  "popup_title": {
+    "message": "Corrector Català",
+    "description": "Títol del popup"
+  },
+  "popup_enabled": {
+    "message": "Activat",
+    "description": "Estat: actiu"
+  },
+  "popup_disabled": {
+    "message": "Desactivat",
+    "description": "Estat: inactiu"
+  },
+  "popup_toggle_global": {
+    "message": "Activar/desactivar globalment",
+    "description": "Toggle d'activació global"
+  },
+  "popup_toggle_domain": {
+    "message": "Desactivar en aquest domini",
+    "description": "Botó per excloure el domini actual"
+  },
+  "popup_open_options": {
+    "message": "Configuració avançada",
+    "description": "Enllaç a la pàgina d'opcions"
+  },
+  "popup_donate": {
+    "message": "Fes un donatiu",
+    "description": "Enllaç de donacions"
+  },
+  "variant_label": {
+    "message": "Variant",
+    "description": "Etiqueta del selector de variant"
+  },
+  "variant_auto": {
+    "message": "Detecció automàtica",
+    "description": "Opció: variant detectada automàticament"
+  },
+  "variant_central": {
+    "message": "Català (general)",
+    "description": "Català estàndard / central"
+  },
+  "variant_valencia": {
+    "message": "Valencià",
+    "description": "Variant valenciana"
+  },
+  "variant_balear": {
+    "message": "Balear",
+    "description": "Variant balear"
+  },
+  "variant_castella": {
+    "message": "Castellà",
+    "description": "Variant: castellà/espanyol (l'extensió també corregeix castellà)"
+  },
+  "variant_detected": {
+    "message": "Detectat: $variant$",
+    "description": "Indicador de variant detectada",
+    "placeholders": {
+      "variant": { "content": "$1", "example": "Valencià" }
+    }
+  },
+  "options_title": {
+    "message": "Configuració del Corrector Català",
+    "description": "Títol de la pàgina d'opcions"
+  },
+  "options_server_section": {
+    "message": "Servidor",
+    "description": "Encapçalament secció servidor"
+  },
+  "options_server_url": {
+    "message": "Adreça del servidor",
+    "description": "Etiqueta del camp URL del servidor"
+  },
+  "options_server_url_help": {
+    "message": "URL on s'envien els textos per corregir. Per defecte, https://corrector.damosenelblanco.com. Pots indicar el teu propi servidor LanguageTool.",
+    "description": "Ajuda del camp servidor"
+  },
+  "options_server_test": {
+    "message": "Comprova la connexió",
+    "description": "Botó de test"
+  },
+  "options_server_ok": {
+    "message": "✓ Connectat correctament. Llengües: $langs$",
+    "description": "Test OK",
+    "placeholders": {
+      "langs": { "content": "$1", "example": "ca-ES, ca-ES-valencia, ca-ES-balear" }
+    }
+  },
+  "options_server_fail": {
+    "message": "✗ No s'ha pogut connectar: $error$",
+    "description": "Test fail",
+    "placeholders": {
+      "error": { "content": "$1", "example": "Failed to fetch" }
+    }
+  },
+  "options_dict_section": {
+    "message": "Diccionari personal",
+    "description": "Secció diccionari"
+  },
+  "options_dict_help": {
+    "message": "Paraules que el corrector ha d'ignorar (una per línia).",
+    "description": "Ajuda diccionari"
+  },
+  "options_domains_section": {
+    "message": "Dominis desactivats",
+    "description": "Secció dominis exclosos"
+  },
+  "options_domains_help": {
+    "message": "El corrector no s'activarà en aquests dominis (un per línia, només el host).",
+    "description": "Ajuda dominis"
+  },
+  "options_save": {
+    "message": "Desa",
+    "description": "Botó desar"
+  },
+  "options_saved": {
+    "message": "Configuració desada",
+    "description": "Confirmació desat"
+  },
+  "suggestion_apply": {
+    "message": "Aplica",
+    "description": "Botó d'aplicar suggeriment"
+  },
+  "suggestion_dismiss": {
+    "message": "Tanca",
+    "description": "Tanca el popup"
+  },
+  "suggestion_add_to_dictionary": {
+    "message": "Afegeix al diccionari",
+    "description": "Afegir paraula al diccionari personal"
+  },
+  "suggestion_ignore_here": {
+    "message": "Ignora aquí",
+    "description": "Ignora el match a aquesta posició només"
+  },
+  "suggestion_no_replacements": {
+    "message": "Sense suggeriments",
+    "description": "Quan LT no proposa cap substitució"
+  },
+  "error_offline": {
+    "message": "No s'ha pogut connectar amb el servidor del corrector.",
+    "description": "Toast d'error de xarxa"
+  },
+  "error_unsupported_editor": {
+    "message": "Aquest editor no és compatible amb el corrector.",
+    "description": "Toast quan l'editor no es pot interceptar (Google Docs canvas, etc.)"
+  },
+  "error_rate_limited": {
+    "message": "Massa peticions. Torna-ho a provar en un moment.",
+    "description": "Toast HTTP 429"
+  },
+  "donate_url": {
+    "message": "https://liberapay.com/correctorcatala",
+    "description": "URL de donacions (configurable)"
+  }
+}
