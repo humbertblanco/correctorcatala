@@ -1,18 +1,18 @@
 <!doctype html>
-<html lang="ca">
+<html lang="es">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Corrector Català — correcció ortogràfica i gramatical lliure</title>
-<meta name="description" content="Substitut gratuït i autohostat de l'extensió de LanguageTool: correcció ortogràfica i gramatical en català (estàndard, valencià, balear) i castellà. Codi obert AGPLv3.">
+<title>Corrector Català — corrección ortográfica y gramatical libre</title>
+<meta name="description" content="Sustituto gratuito y autoalojado de la extensión de LanguageTool: corrección ortográfica y gramatical en catalán (estándar, valenciano, balear) y castellano. Código abierto AGPLv3.">
 <meta property="og:title" content="Corrector Català">
-<meta property="og:description" content="Correcció ortogràfica i gramatical, lliure i sense subscripcions, al teu navegador.">
+<meta property="og:description" content="Corrección ortográfica y gramatical, libre y sin suscripciones, en tu navegador.">
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://corrector.damosenelblanco.com/">
-<link rel="alternate" hreflang="ca" href="https://corrector.damosenelblanco.com/">
-<link rel="alternate" hreflang="es" href="https://corrector.damosenelblanco.com/es.html">
+<meta property="og:url" content="https://corrector.damosenelblanco.com/es.html">
 <meta name="theme-color" content="#c8102e">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="alternate" hreflang="ca" href="https://corrector.damosenelblanco.com/">
+<link rel="alternate" hreflang="es" href="https://corrector.damosenelblanco.com/es.html">
 <style>
 :root {
   --red: #c8102e;
@@ -321,108 +321,108 @@ footer {
 <body>
 <main>
 
-  <nav class="lang-toggle" aria-label="Idioma de la pàgina">
-    <a href="/" class="active" hreflang="ca" lang="ca">Català</a>
-    <a href="/es.html" hreflang="es" lang="es">Castellano</a>
+  <nav class="lang-toggle" aria-label="Idioma de la página">
+    <a href="/" hreflang="ca" lang="ca">Català</a>
+    <a href="/es.html" class="active" hreflang="es" lang="es">Castellano</a>
   </nav>
 
   <header class="hero">
     <h1>Corrector <span class="wave">Català</span></h1>
-    <p class="lead">Correcció ortogràfica i gramatical, gratuïta i lliure, al teu navegador.</p>
-    <p class="pitch">Substitueix l'extensió de LanguageTool que va passar a Premium el gener de 2025. Codi obert, sense subscripcions, sense rastrejament.</p>
+    <p class="lead">Corrección ortográfica y gramatical, gratuita y libre, en tu navegador.</p>
+    <p class="pitch">Sustituye la extensión de LanguageTool que pasó a Premium en enero de 2025. Código abierto, sin suscripciones, sin rastreo. Corrige <strong>catalán y castellano</strong>.</p>
     <div class="cta-row">
-      <a href="#instal" class="btn btn-primary">Instal·la l'extensió</a>
-      <a href="#prova" class="btn btn-ghost">Prova-ho aquí ↓</a>
+      <a href="#instalar" class="btn btn-primary">Instala la extensión</a>
+      <a href="#prueba" class="btn btn-ghost">Pruébalo aquí ↓</a>
     </div>
   </header>
 
-  <section id="prova">
-    <h2>Prova-ho ara mateix</h2>
-    <p class="muted">Escriu o enganxa un text amb errors. Es comprova automàticament després de 0,7 s d'inactivitat. Mateix motor i mateixes regles que l'extensió.</p>
+  <section id="prueba">
+    <h2>Pruébalo ahora mismo</h2>
+    <p class="muted">Escribe o pega un texto con errores. Se comprueba automáticamente tras 0,7 s de inactividad. El mismo motor y las mismas reglas que la extensión.</p>
 
     <div class="demo">
       <div>
-        <span class="label">Text</span>
-        <textarea id="demo-text" spellcheck="false">Aixo es una prova per veure si el corrector troba errors. La gramatica catalana te moltes regles, pero amb una mica de practica es pot dominar.</textarea>
-        <select id="demo-variant" aria-label="Variant del corrector">
-          <option value="ca-ES">Català (general)</option>
-          <option value="ca-ES-valencia">Valencià</option>
+        <span class="label">Texto</span>
+        <textarea id="demo-text" spellcheck="false">Esto es una prueva para ver si el corector encuentra errores. La gramatica española tiene muchas reglas, pero con un poco de practica se puede dominar.</textarea>
+        <select id="demo-variant" aria-label="Variante del corrector">
+          <option value="es" selected>Castellano</option>
+          <option value="ca-ES">Catalán (general)</option>
+          <option value="ca-ES-valencia">Valenciano</option>
           <option value="ca-ES-balear">Balear</option>
-          <option value="es">Castellà</option>
         </select>
       </div>
       <div>
-        <span class="label">Resultat</span>
-        <div id="demo-result" class="result-box" aria-live="polite">Carregant…</div>
+        <span class="label">Resultado</span>
+        <div id="demo-result" class="result-box" aria-live="polite">Cargando…</div>
         <div id="demo-status" class="status"></div>
       </div>
     </div>
   </section>
 
   <section>
-    <h2>Per què existeix</h2>
-    <p>L'extensió oficial de <a href="https://languagetool.org">LanguageTool</a> va passar a <strong>Premium-only</strong> el gener de 2025: després d'un trial de 14 dies els subratllats desapareixen si no pagues. Per a sis milions d'usuaris — i pràcticament tots els catalanoparlants que la feien servir — això va ser un cop dur.</p>
-    <p>Però el motor és <strong>LGPL</strong> i les regles catalanes són excel·lents — les manté <a href="https://softcatala.org">Softcatalà</a> i la comunitat. Aquest projecte exposa aquell motor lliure sobre un servidor propi, autohostable, i hi afegeix una extensió Chrome MV3 nova, gratuïta per sempre.</p>
+    <h2>Por qué existe</h2>
+    <p>La extensión oficial de <a href="https://languagetool.org">LanguageTool</a> pasó a <strong>Premium-only</strong> en enero de 2025: tras un trial de 14 días, los subrayados desaparecen si no pagas. Para seis millones de usuarios — y prácticamente todos los catalanohablantes que la usaban — fue un golpe duro.</p>
+    <p>Pero el motor es <strong>LGPL</strong> y las reglas catalanas son excelentes — las mantienen <a href="https://softcatala.org">Softcatalà</a> y la comunidad. Este proyecto expone ese motor libre sobre un servidor propio, autoalojable, y le añade una extensión Chrome MV3 nueva, gratuita para siempre.</p>
   </section>
 
   <section>
-    <h2>Característiques</h2>
+    <h2>Características</h2>
     <div class="cards">
       <div class="card">
-        <h3>Tres variants de català</h3>
-        <p>Estàndard, valencià i balear, amb detecció automàtica de la variant pel text.</p>
+        <h3>Tres variantes del catalán</h3>
+        <p>Estándar, valenciano y balear, con detección automática de la variante a partir del texto.</p>
       </div>
       <div class="card">
-        <h3>Castellà també</h3>
-        <p>Molts catalans escrivim en les dues llengües. L'extensió ho detecta i corregeix automàticament.</p>
+        <h3>Castellano también</h3>
+        <p>Muchos catalanes escribimos en ambos idiomas. La extensión lo detecta y corrige automáticamente.</p>
       </div>
       <div class="card">
-        <h3>Privadesa real</h3>
-        <p>El text només va al servidor que tu trïis. Sense analítiques, sense cookies, sense rastrejadors.</p>
+        <h3>Privacidad real</h3>
+        <p>El texto solo va al servidor que tú elijas. Sin analíticas, sin cookies, sin rastreadores.</p>
       </div>
     </div>
   </section>
 
-  <section id="instal" class="install">
-    <h2>Instal·la l'extensió</h2>
-    <p class="muted">Encara no és al Chrome Web Store (en procés). Mentre la publiquem, instal·la-la manualment en 5 passos. <strong>És totalment segur</strong>: el codi és obert i auditable.</p>
+  <section id="instalar" class="install">
+    <h2>Instala la extensión</h2>
+    <p class="muted">Aún no está en el Chrome Web Store (en proceso). Mientras la publicamos, instálala manualmente en 5 pasos. <strong>Es totalmente seguro</strong>: el código es abierto y auditable.</p>
 
     <div class="install-cta">
-      <a href="/extension.zip" class="btn btn-primary btn-download" download>Descarrega corrector-catala.zip</a>
+      <a href="/extension.zip" class="btn btn-primary btn-download" download>Descarga corrector-catala.zip</a>
     </div>
 
     <ol class="steps">
-      <li><strong>Descomprimeix</strong> el ZIP en una carpeta on no la moguis (per exemple <code>~/Documents/corrector-catala/</code>).</li>
-      <li>Obre <code>chrome://extensions/</code> al navegador <em>(Chrome, Edge, Brave, Vivaldi…)</em>.</li>
-      <li>Activa <strong>Mode desenvolupador</strong> amb l'interruptor de la cantonada superior dreta.</li>
-      <li>Clica <strong>Carrega sense empaquetar</strong> i selecciona la carpeta que has descomprimit.</li>
-      <li>Fixa la icona del corrector a la barra d'eines clicant el trencaclosques i el pin.</li>
+      <li><strong>Descomprime</strong> el ZIP en una carpeta donde no la muevas (por ejemplo <code>~/Documentos/corrector-catala/</code>).</li>
+      <li>Abre <code>chrome://extensions/</code> en tu navegador <em>(Chrome, Edge, Brave, Vivaldi…)</em>.</li>
+      <li>Activa <strong>Modo desarrollador</strong> con el interruptor de la esquina superior derecha.</li>
+      <li>Haz clic en <strong>Cargar descomprimida</strong> y selecciona la carpeta que has descomprimido.</li>
+      <li>Fija el icono del corrector a la barra de herramientas haciendo clic en el rompecabezas y el pin.</li>
     </ol>
 
-    <p class="note">L'extensió ja apunta per defecte a <code>https://corrector.damosenelblanco.com</code>. Si vols autohostar el teu propi servidor, canvia l'adreça a la pàgina d'opcions.</p>
+    <p class="note">La extensión ya apunta por defecto a <code>https://corrector.damosenelblanco.com</code>. Si quieres autoalojar tu propio servidor, cambia la dirección en la página de opciones.</p>
   </section>
 
   <section>
-    <h2>Per a desenvolupadors</h2>
-    <p>L'API és <strong>compatible amb la de LanguageTool</strong> (<a href="https://languagetool.org/http-api/">v2/check</a>). Pots cridar-la des de qualsevol llenguatge:</p>
+    <h2>Para desarrolladores</h2>
+    <p>La API es <strong>compatible con la de LanguageTool</strong> (<a href="https://languagetool.org/http-api/">v2/check</a>). Puedes invocarla desde cualquier lenguaje:</p>
     <pre><code>curl -X POST https://corrector.damosenelblanco.com/v2/check \
-  --data-urlencode "text=Aixo es una prova" \
-  --data-urlencode "language=ca-ES"</code></pre>
-    <p>Variants suportades: <code>ca-ES</code>, <code>ca-ES-valencia</code>, <code>ca-ES-balear</code>, <code>es</code>. Límit de 30 peticions/min per IP. Per a ús intensiu, <a href="https://github.com/humbertblanco/correctorcatala/blob/main/docs/INSTALL_SERVER.md">autohosta el teu propi servidor</a> (Docker + nginx, 5 minuts).</p>
+  --data-urlencode "text=Esto es una prueva" \
+  --data-urlencode "language=es"</code></pre>
+    <p>Variantes soportadas: <code>ca-ES</code>, <code>ca-ES-valencia</code>, <code>ca-ES-balear</code>, <code>es</code>. Límite de 30 peticiones/min por IP. Para uso intensivo, <a href="https://github.com/humbertblanco/correctorcatala/blob/main/docs/INSTALL_SERVER.md">aloja tu propio servidor</a> (Docker + nginx, 5 minutos).</p>
   </section>
 
   <footer>
     <div class="footer-links">
-      <a href="https://github.com/humbertblanco/correctorcatala">Codi font (GitHub)</a>
+      <a href="https://github.com/humbertblanco/correctorcatala">Código fuente (GitHub)</a>
       <span class="footer-sep">·</span>
-      <a href="https://github.com/humbertblanco/correctorcatala/blob/main/docs/PRIVACY.md">Privadesa</a>
+      <a href="https://github.com/humbertblanco/correctorcatala/blob/main/docs/PRIVACY.md">Privacidad</a>
       <span class="footer-sep">·</span>
-      <a href="https://github.com/humbertblanco/correctorcatala/blob/main/docs/INSTALL_SERVER.md">Autohostatge</a>
+      <a href="https://github.com/humbertblanco/correctorcatala/blob/main/docs/INSTALL_SERVER.md">Autoalojamiento</a>
       <span class="footer-sep">·</span>
-      <a href="https://liberapay.com/correctorcatala">Donacions</a>
+      <a href="https://liberapay.com/correctorcatala">Donaciones</a>
     </div>
-    <p class="agraiments">Construït sobre <a href="https://languagetool.org">LanguageTool</a> (LGPL 2.1). Regles catalanes mantingudes per <a href="https://softcatala.org">Softcatalà</a> i la comunitat. Llicència del projecte: <a href="https://github.com/humbertblanco/correctorcatala/blob/main/LICENSE">AGPLv3</a>.</p>
-    <p class="hosted">Hostatjat per <a href="https://damosenelblanco.com" target="_blank" rel="noopener">Damos en el Blanco</a>.</p>
+    <p class="agraiments">Construido sobre <a href="https://languagetool.org">LanguageTool</a> (LGPL 2.1). Reglas catalanas mantenidas por <a href="https://softcatala.org">Softcatalà</a> y la comunidad. Licencia del proyecto: <a href="https://github.com/humbertblanco/correctorcatala/blob/main/LICENSE">AGPLv3</a>.</p>
+    <p class="hosted">Alojado por <a href="https://damosenelblanco.com" target="_blank" rel="noopener">Damos en el Blanco</a>.</p>
   </footer>
 
 </main>
@@ -444,13 +444,13 @@ const escape = s => s.replace(/[<>&"]/g, c => escapeMap[c]);
 async function check() {
   const text = ta.value;
   if (text.trim().length < 4) {
-    out.innerHTML = '<span class="muted">Escriu alguna cosa…</span>';
+    out.innerHTML = '<span class="muted">Escribe algo…</span>';
     status.textContent = '';
     currentMatches = [];
     return;
   }
   const reqId = ++lastReq;
-  status.textContent = 'Comprovant…';
+  status.textContent = 'Comprobando…';
 
   const body = new URLSearchParams();
   body.set('text', text);
@@ -464,12 +464,12 @@ async function check() {
       body
     });
   } catch (err) {
-    if (reqId === lastReq) status.textContent = 'Error de xarxa: ' + err.message;
+    if (reqId === lastReq) status.textContent = 'Error de red: ' + err.message;
     return;
   }
   if (reqId !== lastReq) return;
   if (resp.status === 429) {
-    status.textContent = 'Massa peticions. Torna-ho a provar en un moment.';
+    status.textContent = 'Demasiadas peticiones. Inténtalo de nuevo en un momento.';
     return;
   }
   if (!resp.ok) {
@@ -483,13 +483,12 @@ async function check() {
 
 function render(text, matches) {
   if (matches.length === 0) {
-    out.innerHTML = '<span class="muted">✓ Sense errors detectats.</span>';
+    out.innerHTML = '<span class="muted">✓ Sin errores detectados.</span>';
     status.textContent = '';
     currentMatches = [];
     return;
   }
 
-  // De-overlap: keep the earliest non-overlapping match.
   const sorted = [...matches].sort((a, b) => a.offset - b.offset || b.length - a.length);
   const filtered = [];
   let lastEnd = -1;
@@ -517,14 +516,13 @@ function render(text, matches) {
     const reps = m.replacements.slice(0, 5);
     const buttons = reps.length
       ? `<div class="repl-row">${reps.map(r => `<button class="repl-btn" data-idx="${idx}" data-val="${escape(r.value)}">${escape(r.value)}</button>`).join('')}</div>`
-      : '<div class="no-replacements">Sense suggeriments automàtics</div>';
+      : '<div class="no-replacements">Sin sugerencias automáticas</div>';
     return `<li data-idx="${idx}"><span class="word">${escape(word)}</span><span class="desc">${escape(m.shortMessage || m.message)}</span>${buttons}</li>`;
   }).join('');
 
   const n = filtered.length;
-  status.innerHTML = `<span class="count">${n}</span> ${n === 1 ? 'error trobat' : 'errors trobats'}<ul class="match-list">${items}</ul>`;
+  status.innerHTML = `<span class="count">${n}</span> ${n === 1 ? 'error encontrado' : 'errores encontrados'}<ul class="match-list">${items}</ul>`;
 
-  // Wire up replacement buttons
   status.querySelectorAll('.repl-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       const idx = +btn.dataset.idx;
@@ -538,7 +536,6 @@ function render(text, matches) {
     });
   });
 
-  // Mark click → highlight matching list item
   out.querySelectorAll('.mark').forEach(span => {
     const handler = () => {
       const idx = +span.dataset.idx;
@@ -562,7 +559,6 @@ ta.addEventListener('input', () => {
 });
 sel.addEventListener('change', check);
 
-// Run once on load with the prefilled demo text
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', check);
 } else {
