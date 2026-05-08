@@ -78,6 +78,12 @@ function pointToOffset(
   return found.start + offsetInNode;
 }
 
+// Wait this many ms after the last mutation before re-rendering highlights.
+// Editing in React/Slate/ProseMirror typically fires bursts of mutations per
+// keystroke; without coalescing we'd run flattenText() (a TreeWalker pass) on
+// every one of them.
+const RENDER_DEBOUNCE_MS = 80;
+
 class ContentEditableAdapter implements EditorAdapter {
   readonly element: HTMLElement;
   private matches: LtMatch[] = [];
@@ -88,21 +94,30 @@ class ContentEditableAdapter implements EditorAdapter {
   private matchClickCallbacks = new Set<(idx: number, rect: DOMRect) => void>();
   private destroyed = false;
   private highlight: Highlight | null = null;
+  private renderTimer: number | null = null;
+  private changeTimer: number | null = null;
 
   constructor(el: HTMLElement) {
     this.element = el;
     ContentEditableAdapter.injectStylesOnce();
 
     this.inputListener = () => {
-      this.render();
-      for (const cb of this.textChangeCallbacks) cb();
+      this.scheduleRender();
+      this.scheduleChangeFanout();
     };
     el.addEventListener('input', this.inputListener);
 
-    this.observer = new MutationObserver(() => {
-      // External DOM mutation (paste, framework rerender) — re-render highlights against new offsets.
-      this.render();
-      for (const cb of this.textChangeCallbacks) cb();
+    this.observer = new MutationObserver((records) => {
+      // Skip mutations that are entirely caused by us (e.g., applyReplacement
+      // dispatching events in same task). Without this we get a feedback loop.
+      const external = records.some((r) => {
+        const t = r.target;
+        if (!(t instanceof Element)) return true;
+        return !t.closest('[data-cc]');
+      });
+      if (!external) return;
+      this.scheduleRender();
+      this.scheduleChangeFanout();
     });
     this.observer.observe(el, { childList: true, characterData: true, subtree: true });
 
@@ -173,10 +188,29 @@ class ContentEditableAdapter implements EditorAdapter {
   destroy(): void {
     if (this.destroyed) return;
     this.destroyed = true;
+    if (this.renderTimer) window.clearTimeout(this.renderTimer);
+    if (this.changeTimer) window.clearTimeout(this.changeTimer);
     this.element.removeEventListener('input', this.inputListener);
     this.element.removeEventListener('click', this.clickListener);
     this.observer.disconnect();
     this.clearHighlight();
+  }
+
+  private scheduleRender(): void {
+    if (this.renderTimer != null) return;
+    this.renderTimer = window.setTimeout(() => {
+      this.renderTimer = null;
+      if (!this.destroyed) this.render();
+    }, RENDER_DEBOUNCE_MS);
+  }
+
+  private scheduleChangeFanout(): void {
+    if (this.changeTimer != null) return;
+    this.changeTimer = window.setTimeout(() => {
+      this.changeTimer = null;
+      if (this.destroyed) return;
+      for (const cb of this.textChangeCallbacks) cb();
+    }, RENDER_DEBOUNCE_MS);
   }
 
   private render(): void {

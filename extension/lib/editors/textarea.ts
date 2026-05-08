@@ -36,6 +36,9 @@ class TextareaAdapter implements EditorAdapter {
     const parent = el.parentElement;
     this.wrapper = document.createElement('div');
     this.wrapper.className = 'cc-wrapper';
+    // data-cc lets the global mutation observer skip our own DOM mutations
+    // (otherwise wrapping/unwrapping triggers re-scans → feedback loop).
+    this.wrapper.setAttribute('data-cc', 'wrapper');
     this.wrapper.style.position = 'relative';
     this.wrapper.style.display = 'inline-block';
     this.wrapper.style.width = '100%';
@@ -45,6 +48,7 @@ class TextareaAdapter implements EditorAdapter {
     this.mirror = document.createElement('div');
     this.mirror.className = MIRROR_CLASS;
     this.mirror.setAttribute('aria-hidden', 'true');
+    this.mirror.setAttribute('data-cc', 'mirror');
     Object.assign(this.mirror.style, {
       position: 'absolute',
       top: '0',

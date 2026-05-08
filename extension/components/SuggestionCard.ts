@@ -63,6 +63,7 @@ export class SuggestionCard {
 
   constructor() {
     this.host = document.createElement('div');
+    this.host.setAttribute('data-cc', 'popup');
     this.host.style.position = 'fixed';
     this.host.style.zIndex = '2147483647';
     this.host.style.top = '0';

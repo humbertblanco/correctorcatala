@@ -9,18 +9,27 @@ import type { LtMatch, Message, ResolvedVariant, Settings } from '../lib/types';
 const DEBOUNCE_MS = 700;
 const MIN_TEXT_LEN = 4;
 const MAX_TEXT_LEN = 50_000;
+// Mutation throttling: process at most once per ~150 ms in idle time. SPAs can
+// fire thousands of mutations per second; running attach()/scan() on each one
+// is what triggers Chrome's "this extension is slowing your browser" warning.
+const MUTATION_BATCH_MS = 150;
+// If a single batch carries more mutations than this, the page is doing heavy
+// DOM churn and our incremental scan would dominate the main thread. Skip the
+// addedNodes pass for that batch (we'll still pick up new editors on the next
+// quieter batch). 500 ≈ Twitter/Drive in worst case.
+const MUTATION_OVERLOAD = 500;
 
 export default defineContentScript({
   matches: ['<all_urls>'],
   runAt: 'document_idle',
   allFrames: false,
   async main(ctx) {
-    const settings = await getSettings();
-    if (!settings.enabled) return;
-    if (isDomainDisabled(settings, location.hostname)) return;
+    const initialSettings = await getSettings();
+    if (!initialSettings.enabled) return;
+    if (isDomainDisabled(initialSettings, location.hostname)) return;
 
     const origin = location.origin;
-    let currentSettings: Settings = settings;
+    let currentSettings: Settings = initialSettings;
     let card: SuggestionCard | null = null;
     const adapters = new Map<Element, AdapterState>();
     const ignoredHere = new WeakMap<Element, Set<string>>(); // ruleId+offset
@@ -40,7 +49,6 @@ export default defineContentScript({
       if (!s.enabled || isDomainDisabled(s, location.hostname)) {
         teardownAll();
       } else {
-        // Re-check all adapters with new variant resolution.
         for (const state of adapters.values()) {
           scheduleCheck(state, true);
         }
@@ -71,7 +79,6 @@ export default defineContentScript({
       state.unsubChange = adapter.onTextChange(() => scheduleCheck(state, false));
       state.unsubClick = adapter.onMatchClick((idx, rect) => showCardForMatch(state, idx, rect));
 
-      // Initial check (after a small delay to let the page settle)
       window.setTimeout(() => scheduleCheck(state, true), 200);
     }
 
@@ -131,7 +138,6 @@ export default defineContentScript({
         return;
       }
       if (!resp) return;
-      // Drop stale results: text may have changed since we sent.
       if (state.adapter.getText() !== text) return;
       if (resp.type === 'check:result') {
         const localIgnore = ignoredHere.get(state.adapter.element);
@@ -140,8 +146,6 @@ export default defineContentScript({
           : resp.matches;
         state.currentMatches = filtered;
         state.adapter.setMatches(filtered);
-      } else if (resp.type === 'check:error') {
-        // Silent failure for v1 (no toast spam). Could surface in popup.
       }
     }
 
@@ -151,7 +155,6 @@ export default defineContentScript({
       ensureCard().show(match, rect, {
         onApply: (replacement) => {
           state.adapter.applyReplacement(match.offset, match.length, replacement);
-          // Force re-check on next tick (text changed)
           state.lastCheckedText = '';
           scheduleCheck(state, false);
         },
@@ -175,29 +178,100 @@ export default defineContentScript({
       });
     }
 
-    // Initial scan + observer for dynamically added editors
     function scan(root: ParentNode): void {
       for (const el of root.querySelectorAll(EDITOR_SELECTOR)) attach(el);
     }
     scan(document);
 
-    const observer = new MutationObserver(muts => {
-      for (const m of muts) {
-        for (const node of m.addedNodes) {
-          if (node instanceof Element) {
-            if (node.matches(EDITOR_SELECTOR)) attach(node);
-            scan(node);
+    // ---- Throttled DOM-mutation scanner -------------------------------------
+    // Why throttle: SPAs (Drive, Twitter, Gmail, Reddit) emit thousands of
+    // mutations per second. Synchronously scanning subtrees on each one was the
+    // root cause of Chrome's "this extension is slowing your browser" warning.
+    //
+    // Strategy:
+    //  1. Buffer mutations.
+    //  2. Coalesce processing into one batch every MUTATION_BATCH_MS in idle
+    //     time (requestIdleCallback when available; setTimeout fallback).
+    //  3. Skip mutations whose subtree is entirely our own injected DOM
+    //     (mirror, suggestion popup, wrapper). They produce a feedback loop
+    //     otherwise.
+    //  4. If a batch is huge (>MUTATION_OVERLOAD), skip the addedNodes scan to
+    //     avoid blocking the main thread; new editors will be picked up on the
+    //     next calmer batch.
+    //  5. Always honor removals (cheap and necessary for cleanup).
+
+    let pending: MutationRecord[] = [];
+    let scheduled = false;
+    type IdleScheduler = (cb: () => void) => void;
+    const schedule: IdleScheduler =
+      typeof window.requestIdleCallback === 'function'
+        ? (cb) => {
+            window.requestIdleCallback(cb, { timeout: MUTATION_BATCH_MS * 2 });
           }
-        }
+        : (cb) => {
+            window.setTimeout(cb, MUTATION_BATCH_MS);
+          };
+
+    function isOurOwn(node: Node | null): boolean {
+      let cur: Node | null = node;
+      while (cur) {
+        if (cur instanceof Element && cur.hasAttribute('data-cc')) return true;
+        cur = cur.parentNode;
+      }
+      return false;
+    }
+
+    function processBatch(records: MutationRecord[]): void {
+      // Filter out our own DOM noise (mirror updates, popup show/hide).
+      const real = records.filter(m => !isOurOwn(m.target));
+      if (real.length === 0) return;
+
+      const overloaded = real.length > MUTATION_OVERLOAD;
+      let totalAdded = 0;
+
+      for (const m of real) {
+        // Removals first (always run; cheap and prevents leaks).
         for (const node of m.removedNodes) {
-          if (node instanceof Element) {
-            if (adapters.has(node)) detach(node);
-            for (const inner of node.querySelectorAll(EDITOR_SELECTOR)) {
-              if (adapters.has(inner)) detach(inner);
+          if (!(node instanceof Element)) continue;
+          if (adapters.has(node)) detach(node);
+          // Also detach any nested editors that left the DOM with this node.
+          if (adapters.size > 0) {
+            for (const candidate of adapters.keys()) {
+              if (node.contains(candidate)) detach(candidate);
             }
           }
         }
+
+        if (overloaded) continue;
+
+        for (const node of m.addedNodes) {
+          totalAdded++;
+          if (totalAdded > MUTATION_OVERLOAD) break;
+          if (!(node instanceof Element)) continue;
+          if (isOurOwn(node)) continue;
+          if (node.matches(EDITOR_SELECTOR)) attach(node);
+          // Only descend into the new subtree if it could plausibly contain
+          // editors. Most added nodes are plain text or attribute updates.
+          if (node.firstElementChild) scan(node);
+        }
       }
+    }
+
+    const observer = new MutationObserver(muts => {
+      // Append to pending buffer; coalesce into one idle pass.
+      pending.push(...muts);
+      if (scheduled) return;
+      scheduled = true;
+      schedule(() => {
+        scheduled = false;
+        const batch = pending;
+        pending = [];
+        try {
+          processBatch(batch);
+        } catch {
+          // Never let an exception break the observer chain.
+        }
+      });
     });
     observer.observe(document.documentElement, { childList: true, subtree: true });
 
