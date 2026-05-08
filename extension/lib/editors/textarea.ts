@@ -19,11 +19,11 @@ const MIRROR_STYLE_PROPS = [
 class TextareaAdapter implements EditorAdapter {
   readonly element: HTMLTextAreaElement | HTMLInputElement;
   private mirror: HTMLDivElement;
-  private wrapper: HTMLDivElement;
   private matches: LtMatch[] = [];
   private inputListener: () => void;
-  private scrollListener: () => void;
-  private scrollRaf: number | null = null;
+  private internalScrollListener: () => void;
+  private windowScrollListener: () => void;
+  private repositionRaf: number | null = null;
   private resizeObserver: ResizeObserver;
   private textChangeCallbacks = new Set<() => void>();
   private matchClickCallbacks = new Set<(idx: number, rect: DOMRect) => void>();
@@ -34,38 +34,41 @@ class TextareaAdapter implements EditorAdapter {
   constructor(el: HTMLTextAreaElement | HTMLInputElement) {
     this.element = el;
 
-    // Wrap the textarea in a position:relative container so we can absolutely position the mirror.
-    // We avoid mutating layout: insert wrapper around element, move element inside.
-    const parent = el.parentElement;
-    this.wrapper = document.createElement('div');
-    this.wrapper.className = 'cc-wrapper';
-    // data-cc lets the global mutation observer skip our own DOM mutations
-    // (otherwise wrapping/unwrapping triggers re-scans → feedback loop).
-    this.wrapper.setAttribute('data-cc', 'wrapper');
-    this.wrapper.style.position = 'relative';
-    this.wrapper.style.display = 'inline-block';
-    this.wrapper.style.width = '100%';
-    if (parent) parent.insertBefore(this.wrapper, el);
-    this.wrapper.appendChild(el);
+    // IMPORTANT: do NOT wrap the user's element. Wrapping it (the original
+    // approach) caused two production bugs on Google search and similar sites:
+    //
+    //   1. With lazy-attach, attach() runs *during* focusin. Wrapping moves the
+    //      element via wrapper.appendChild(el) — which detaches it from its
+    //      current parent and re-attaches under the wrapper. That detach
+    //      blurs the element mid-focus, so the user's first keystroke goes
+    //      nowhere.
+    //   2. Inserting a <div> between a flex/grid container and the input
+    //      breaks the site's layout (e.g. the search bar disappears or
+    //      collapses to width 0).
+    //
+    // Solution: the mirror lives at document.body level with position: fixed,
+    // and we re-align it to the textarea's bounding rect on scroll/resize.
+    // The user's textarea/input stays exactly where the site put it.
 
     this.mirror = document.createElement('div');
     this.mirror.className = MIRROR_CLASS;
     this.mirror.setAttribute('aria-hidden', 'true');
     this.mirror.setAttribute('data-cc', 'mirror');
     Object.assign(this.mirror.style, {
-      position: 'absolute',
+      position: 'fixed',
       top: '0',
       left: '0',
       pointerEvents: 'none',
       color: 'transparent',
       background: 'transparent',
-      zIndex: '1',
+      // Below the absolute max so site dialogs at 2147483647 still win.
+      zIndex: '2147483646',
       margin: '0',
       overflow: 'hidden',
     } satisfies Partial<CSSStyleDeclaration>);
-    this.wrapper.appendChild(this.mirror);
+    document.body.appendChild(this.mirror);
 
-    this.syncStyles();
+    this.syncStylesAndPosition();
     this.render();
 
     this.inputListener = () => {
@@ -75,20 +78,17 @@ class TextareaAdapter implements EditorAdapter {
     el.addEventListener('input', this.inputListener);
     el.addEventListener('change', this.inputListener);
 
-    // Scroll fires very frequently on long textareas. Coalesce sync via rAF.
-    this.scrollListener = () => {
-      if (this.scrollRaf != null) return;
-      this.scrollRaf = window.requestAnimationFrame(() => {
-        this.scrollRaf = null;
-        this.mirror.scrollTop = el.scrollTop;
-        this.mirror.scrollLeft = el.scrollLeft;
-      });
-    };
-    el.addEventListener('scroll', this.scrollListener, { passive: true });
+    // textarea's own scroll: re-sync mirror's internal scroll (rAF coalesced)
+    this.internalScrollListener = () => this.scheduleReposition();
+    el.addEventListener('scroll', this.internalScrollListener, { passive: true });
 
-    this.resizeObserver = new ResizeObserver(() => {
-      this.syncStyles();
-    });
+    // ANY scroll on the page (capture catches all ancestors) → textarea has
+    // moved on screen → mirror must follow. Same for window resize.
+    this.windowScrollListener = () => this.scheduleReposition();
+    window.addEventListener('scroll', this.windowScrollListener, { capture: true, passive: true });
+    window.addEventListener('resize', this.windowScrollListener, { passive: true });
+
+    this.resizeObserver = new ResizeObserver(() => this.scheduleReposition());
     this.resizeObserver.observe(el);
 
     this.mirror.addEventListener('click', this.handleMirrorClick);
@@ -111,6 +111,14 @@ class TextareaAdapter implements EditorAdapter {
     }, TextareaAdapter.RENDER_DEBOUNCE_MS);
   }
 
+  private scheduleReposition(): void {
+    if (this.repositionRaf != null) return;
+    this.repositionRaf = window.requestAnimationFrame(() => {
+      this.repositionRaf = null;
+      if (!this.destroyed) this.syncStylesAndPosition();
+    });
+  }
+
   applyReplacement(offset: number, length: number, value: string): void {
     const el = this.element;
     const before = el.value.slice(0, offset);
@@ -118,7 +126,6 @@ class TextareaAdapter implements EditorAdapter {
     const next = before + value + after;
     const caret = offset + value.length;
 
-    // Use the input event to keep React/Vue/etc state in sync.
     const setter = Object.getOwnPropertyDescriptor(
       el.tagName === 'TEXTAREA' ? HTMLTextAreaElement.prototype : HTMLInputElement.prototype,
       'value',
@@ -144,33 +151,40 @@ class TextareaAdapter implements EditorAdapter {
     if (this.destroyed) return;
     this.destroyed = true;
     if (this.renderTimer) window.clearTimeout(this.renderTimer);
-    if (this.scrollRaf) window.cancelAnimationFrame(this.scrollRaf);
+    if (this.repositionRaf) window.cancelAnimationFrame(this.repositionRaf);
     this.element.removeEventListener('input', this.inputListener);
     this.element.removeEventListener('change', this.inputListener);
-    this.element.removeEventListener('scroll', this.scrollListener);
+    this.element.removeEventListener('scroll', this.internalScrollListener);
+    window.removeEventListener('scroll', this.windowScrollListener, true);
+    window.removeEventListener('resize', this.windowScrollListener);
     this.resizeObserver.disconnect();
     this.mirror.removeEventListener('click', this.handleMirrorClick);
-    // Restore original DOM (move element out of wrapper, remove wrapper).
-    const parent = this.wrapper.parentElement;
-    if (parent) {
-      parent.insertBefore(this.element, this.wrapper);
-      parent.removeChild(this.wrapper);
-    }
+    this.mirror.remove();
   }
 
-  private syncStyles(): void {
-    const cs = window.getComputedStyle(this.element);
+  private syncStylesAndPosition(): void {
+    const el = this.element;
+    const rect = el.getBoundingClientRect();
+
+    // Element invisible/detached → hide mirror, no point in drawing.
+    if (rect.width === 0 || rect.height === 0 || !document.contains(el)) {
+      this.mirror.style.visibility = 'hidden';
+      return;
+    }
+    this.mirror.style.visibility = 'visible';
+
+    const cs = window.getComputedStyle(el);
     for (const prop of MIRROR_STYLE_PROPS) {
       this.mirror.style.setProperty(prop, cs.getPropertyValue(prop));
     }
-    // The textarea may set width via `cols`; mirror should match its actual rendered size.
-    const rect = this.element.getBoundingClientRect();
-    const wrapRect = this.wrapper.getBoundingClientRect();
-    this.mirror.style.top = `${rect.top - wrapRect.top}px`;
-    this.mirror.style.left = `${rect.left - wrapRect.left}px`;
+    this.mirror.style.top = `${rect.top}px`;
+    this.mirror.style.left = `${rect.left}px`;
     this.mirror.style.width = `${rect.width}px`;
     this.mirror.style.height = `${rect.height}px`;
     this.mirror.style.color = 'transparent';
+    // Mirror reuses the *visual* scroll of the textarea, since both share text.
+    this.mirror.scrollTop = el.scrollTop;
+    this.mirror.scrollLeft = el.scrollLeft;
   }
 
   private render(): void {
@@ -179,7 +193,6 @@ class TextareaAdapter implements EditorAdapter {
       this.mirror.textContent = text;
       return;
     }
-    // Sort matches by offset and clip to text length to avoid stale-render artifacts.
     const sorted = [...this.matches]
       .filter(m => m.offset < text.length && m.offset + m.length <= text.length)
       .sort((a, b) => a.offset - b.offset);
@@ -197,13 +210,17 @@ class TextareaAdapter implements EditorAdapter {
       span.textContent = text.slice(m.offset, m.offset + m.length);
       span.style.pointerEvents = 'auto';
       span.style.cursor = 'pointer';
+      // Style the underline directly so we don't depend on a stylesheet
+      // injection (some sites strip our styles).
+      span.style.textDecoration = 'underline wavy #c8102e';
+      span.style.textDecorationSkipInk = 'none';
+      span.style.textUnderlineOffset = '2px';
       this.mirror.appendChild(span);
       cursor = m.offset + m.length;
     });
     if (cursor < text.length) {
       this.mirror.appendChild(document.createTextNode(text.slice(cursor)));
     }
-    // Sync scroll
     this.mirror.scrollTop = this.element.scrollTop;
     this.mirror.scrollLeft = this.element.scrollLeft;
   }
