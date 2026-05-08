@@ -5,6 +5,7 @@ import { sendToBackground } from '../lib/messaging';
 import { getSettings, isDomainDisabled, onSettingsChanged, resolveVariant, setSettings } from '../lib/settings';
 import { SuggestionCard } from '../components/SuggestionCard';
 import { Toast } from '../components/Toast';
+import { StatusIndicator } from '../components/StatusIndicator';
 import { t } from '../lib/i18n';
 import type { LtMatch, Message, ResolvedVariant, Settings } from '../lib/types';
 
@@ -42,6 +43,8 @@ export default defineContentScript({
     const origin = location.origin;
     let currentSettings: Settings = initialSettings;
     let card: SuggestionCard | null = null;
+    let status: StatusIndicator | null = null;
+    let lastNetworkErrorToast = 0;
     const adapters = new Map<Element, AdapterState>();
     const ignoredHere = new WeakMap<Element, Set<string>>();
     const detachTimers = new Map<Element, number>();
@@ -72,6 +75,23 @@ export default defineContentScript({
     function ensureCard(): SuggestionCard {
       if (!card) card = new SuggestionCard();
       return card;
+    }
+
+    function ensureStatus(): StatusIndicator {
+      if (!status) status = new StatusIndicator();
+      return status;
+    }
+
+    function maybeShowNetworkErrorToast(): void {
+      const now = Date.now();
+      // Rate-limit: don't spam if the user is typing while offline.
+      if (now - lastNetworkErrorToast < 30_000) return;
+      lastNetworkErrorToast = now;
+      new Toast({
+        title: t('error_offline'),
+        body: t('toast_offline_body'),
+        onDismiss: () => {},
+      });
     }
 
     function attach(el: Element): void {
@@ -130,6 +150,8 @@ export default defineContentScript({
       for (const el of [...adapters.keys()]) detach(el);
       card?.destroy();
       card = null;
+      status?.destroy();
+      status = null;
     }
 
     function scheduleCheck(state: AdapterState, immediate: boolean): void {
@@ -160,6 +182,9 @@ export default defineContentScript({
       const variant = resolveVariant(currentSettings, origin, detected);
       state.variant = variant;
 
+      // Show the "checking…" pip near this editor.
+      ensureStatus().show(state.adapter.element);
+
       let resp: Message | undefined;
       try {
         resp = await sendToBackground({
@@ -169,8 +194,10 @@ export default defineContentScript({
           origin,
         });
       } catch {
+        status?.hide();
         return;
       }
+      status?.hide();
       if (!resp) return;
       if (state.adapter.getText() !== text) return;
       if (resp.type === 'check:result') {
@@ -180,6 +207,8 @@ export default defineContentScript({
           : resp.matches;
         state.currentMatches = filtered;
         state.adapter.setMatches(filtered);
+      } else if (resp.type === 'check:error') {
+        if (resp.reason === 'network') maybeShowNetworkErrorToast();
       }
     }
 

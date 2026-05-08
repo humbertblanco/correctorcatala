@@ -176,6 +176,10 @@
     "message": "Entesos",
     "description": "Toast: dismiss button"
   },
+  "toast_offline_body": {
+    "message": "El servidor del corrector no respon. Revisa la teva connexió o canvia el servidor a la pàgina d'opcions.",
+    "description": "Toast body explaining the network error"
+  },
   "popup_open_corrector_web": {
     "message": "Obre text al corrector web",
     "description": "Popup button to open the current selection in the web demo"

@@ -1,7 +1,29 @@
 import { t } from '../lib/i18n';
 
 const STYLES = /* css */ `
-:host { all: initial; }
+:host {
+  all: initial;
+  --bg: #ffffff;
+  --ink: #1a1a1a;
+  --ink-soft: #444;
+  --line: #d8d3ca;
+  --close: #999;
+  --close-hover: #333;
+  --red: #c8102e;
+  --red-dark: #a30d24;
+}
+@media (prefers-color-scheme: dark) {
+  :host {
+    --bg: #232630;
+    --ink: #ebe7df;
+    --ink-soft: #c0bdb6;
+    --line: #444751;
+    --close: #6a6a6a;
+    --close-hover: #c0bdb6;
+    --red: #e1364f;
+    --red-dark: #c8102e;
+  }
+}
 .toast {
   position: fixed;
   right: 16px;
@@ -10,11 +32,11 @@ const STYLES = /* css */ `
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
   font-size: 13.5px;
   line-height: 1.45;
-  color: #1a1a1a;
-  background: #ffffff;
-  border: 1px solid #d8d3ca;
+  color: var(--ink);
+  background: var(--bg);
+  border: 1px solid var(--line);
   border-radius: 10px;
-  box-shadow: 0 10px 32px rgba(0,0,0,0.18), 0 2px 8px rgba(0,0,0,0.06);
+  box-shadow: 0 10px 32px rgba(0,0,0,0.28), 0 2px 8px rgba(0,0,0,0.12);
   padding: 14px 38px 14px 16px;
   max-width: 340px;
   pointer-events: auto;
@@ -28,9 +50,9 @@ const STYLES = /* css */ `
   font-weight: 600;
   margin: 0 0 4px 0;
   font-size: 13.5px;
-  color: #c8102e;
+  color: var(--red);
 }
-.body { margin: 0 0 10px 0; color: #444; }
+.body { margin: 0 0 10px 0; color: var(--ink-soft); }
 .actions { display: flex; gap: 8px; flex-wrap: wrap; }
 .btn {
   font-family: inherit;
@@ -38,34 +60,34 @@ const STYLES = /* css */ `
   font-weight: 500;
   padding: 5px 12px;
   border-radius: 4px;
-  border: 1px solid #d8d3ca;
-  background: white;
-  color: #444;
+  border: 1px solid var(--line);
+  background: var(--bg);
+  color: var(--ink-soft);
   cursor: pointer;
   text-decoration: none;
   display: inline-block;
 }
-.btn:hover { color: #c8102e; border-color: #c8102e; }
+.btn:hover { color: var(--red); border-color: var(--red); }
 .btn-primary {
-  background: #c8102e;
+  background: var(--red);
   color: white;
-  border-color: #c8102e;
+  border-color: var(--red);
 }
-.btn-primary:hover { background: #a30d24; border-color: #a30d24; color: white; }
+.btn-primary:hover { background: var(--red-dark); border-color: var(--red-dark); color: white; }
 .close {
   position: absolute;
   top: 6px;
   right: 8px;
   background: transparent;
   border: none;
-  color: #999;
+  color: var(--close);
   font-size: 18px;
   line-height: 1;
   cursor: pointer;
   padding: 2px 6px;
   font-family: inherit;
 }
-.close:hover { color: #333; }
+.close:hover { color: var(--close-hover); }
 `;
 
 export interface ToastOptions {

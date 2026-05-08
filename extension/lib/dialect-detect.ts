@@ -16,19 +16,34 @@ interface Marker {
 // Spanish markers — chosen so most don't appear in Catalan text.
 // ---------------------------------------------------------------------------
 const SPANISH: Marker[] = [
-  { re: /ñ/g, w: 3 },                                                 // unique to Spanish
+  // Unique characters / suffixes — strong signal across most Spanish text.
+  { re: /ñ/gi, w: 3 },
+  { re: /\b\w+ción\b/gi, w: 2 },                  // Catalan equivalent: -ció
+  { re: /\b\w+mente\b/gi, w: 1 },                 // Catalan equivalent: -ment
+
+  // Pronouns / demonstratives only Spanish
   { re: /\b(nosotros|vosotros|ellos|ellas|usted|ustedes)\b/gi, w: 3 },
+  { re: /\b(unos|unas|esto|eso|aquello)\b/gi, w: 2 },
+
+  // Common adverbs / function words only Spanish
   { re: /\bmuy\b/gi, w: 2 },
-  { re: /\b(qué|cómo|cuándo|dónde|por\s+qué|porqué)\b/gi, w: 2 },
-  { re: /\b(más|también|después|antes|porque|todavía|así|aquí|allí)\b/gi, w: 2 },
-  { re: /\b(está|están|estás|estoy|estamos|estuvieron)\b/gi, w: 2 },
-  { re: /\b(haber|tener|hacer|dijo|hizo|tuvo|hubo)\b/gi, w: 2 },
-  { re: /\b(unos|unas)\b/gi, w: 2 },
-  { re: /\b(con|sin|hacia|hasta|desde|durante|según)\b/gi, w: 1 },
-  { re: /\b(aunque|pues|entonces|mientras)\b/gi, w: 1 },
-  { re: /\b(siempre|nunca|jamás|ahora)\b/gi, w: 1 },
-  { re: /\b(soy|eres|fue|fueron|seré|seréis|seríamos)\b/gi, w: 1 },
   { re: /\bhay\b/gi, w: 2 },                                          // Catalan: "hi ha"
+  { re: /\b(qué|cómo|cuándo|dónde|por\s+qué|porqué)\b/gi, w: 2 },
+  { re: /\b(más|también|después|antes|porque|todavía|así|aquí|allí|sólo|solo)\b/gi, w: 2 },
+
+  // Verb forms only Spanish (Catalan equivalents have grave accents)
+  { re: /\b(está|están|estás|estoy|estamos|estuvieron|estuvo)\b/gi, w: 2 },
+  { re: /\b(haber|tener|hacer|dijo|hizo|tuvo|hubo|sido|hecho)\b/gi, w: 2 },
+  { re: /\b(será|sería|serán|sean|hayan)\b/gi, w: 1 },
+  { re: /\b(soy|eres|fue|fueron|seré|seríamos)\b/gi, w: 1 },
+
+  // Spanish-distinctive nouns/adjectives without Catalan cognates
+  { re: /\b(cliente|clientes|cuenta|cuentas|pedido|pedidos|prueba|pruebas|errores)\b/gi, w: 2 },
+  { re: /\b(día|días|mes|año|años|mañana|noche|tarde)\b/gi, w: 1 },
+
+  // Prepositions / connectors only Spanish
+  { re: /\b(con|sin|hacia|hasta|desde|durante|según)\b/gi, w: 1 },
+  { re: /\b(aunque|pues|entonces|mientras|siempre|nunca|jamás|ahora)\b/gi, w: 1 },
 ];
 
 // ---------------------------------------------------------------------------
@@ -85,7 +100,9 @@ const BALEARIC: Marker[] = [
 
 const NEUTRAL_THRESHOLD = 3;
 const RATIO_THRESHOLD = 1.8;
-const ES_FLOOR = 4;
+// Lowered from 4 → 3 so generic Spanish text (no ñ / nosotros / muy etc.)
+// still picks up via the broader -ción / verb-form markers added below.
+const ES_FLOOR = 3;
 const ES_DOMINANCE = 1.5;
 
 function score(text: string, markers: Marker[]): number {

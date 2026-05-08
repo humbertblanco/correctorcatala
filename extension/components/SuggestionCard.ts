@@ -11,15 +11,39 @@ export interface SuggestionCardActions {
 const STYLES = /* css */ `
 :host {
   all: initial;
+  --bg: #ffffff;
+  --ink: #1f1f1f;
+  --ink-soft: #333;
+  --muted: #888;
+  --line: #d0d0d0;
+  --line-soft: #eee;
+  --close: #999;
+  --close-hover: #333;
+  --red: #c8102e;
+  --red-dark: #a30d24;
+}
+@media (prefers-color-scheme: dark) {
+  :host {
+    --bg: #232630;
+    --ink: #ebe7df;
+    --ink-soft: #c0bdb6;
+    --muted: #8a8780;
+    --line: #444751;
+    --line-soft: #353841;
+    --close: #6a6a6a;
+    --close-hover: #c0bdb6;
+    --red: #e1364f;
+    --red-dark: #c8102e;
+  }
 }
 .card {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
   font-size: 13px;
-  color: #1f1f1f;
-  background: #ffffff;
-  border: 1px solid #d0d0d0;
+  color: var(--ink);
+  background: var(--bg);
+  border: 1px solid var(--line);
   border-radius: 8px;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.18), 0 2px 6px rgba(0,0,0,0.08);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.28), 0 2px 6px rgba(0,0,0,0.12);
   padding: 12px;
   width: 320px;
   max-width: calc(100vw - 16px);
@@ -28,31 +52,31 @@ const STYLES = /* css */ `
   box-sizing: border-box;
   line-height: 1.4;
 }
-.message { margin: 0 0 8px 0; color: #333; }
-.short { font-weight: 600; color: #c8102e; margin-bottom: 4px; }
+.message { margin: 0 0 8px 0; color: var(--ink-soft); }
+.short { font-weight: 600; color: var(--red); margin-bottom: 4px; }
 .replacements { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 10px; }
 .repl {
-  background: #c8102e; color: white;
+  background: var(--red); color: white;
   border: none; border-radius: 4px;
   padding: 4px 10px; font-size: 12px;
   cursor: pointer; font-family: inherit;
 }
-.repl:hover { background: #a30d24; }
-.no-repl { color: #888; font-style: italic; font-size: 12px; padding: 4px 0; }
-.actions { display: flex; flex-wrap: wrap; gap: 8px; border-top: 1px solid #eee; padding-top: 8px; }
+.repl:hover { background: var(--red-dark); }
+.no-repl { color: var(--muted); font-style: italic; font-size: 12px; padding: 4px 0; }
+.actions { display: flex; flex-wrap: wrap; gap: 8px; border-top: 1px solid var(--line-soft); padding-top: 8px; }
 .btn {
   background: transparent; border: none;
-  color: #555; font-size: 11.5px;
+  color: var(--ink-soft); font-size: 11.5px;
   cursor: pointer; padding: 2px 4px;
   font-family: inherit;
 }
-.btn:hover { color: #c8102e; }
+.btn:hover { color: var(--red); }
 .close {
   position: absolute; top: 6px; right: 8px;
   background: transparent; border: none;
-  color: #999; font-size: 16px; line-height: 1; cursor: pointer;
+  color: var(--close); font-size: 16px; line-height: 1; cursor: pointer;
 }
-.close:hover { color: #333; }
+.close:hover { color: var(--close-hover); }
 `;
 
 export class SuggestionCard {

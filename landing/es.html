@@ -9,6 +9,15 @@
 <meta property="og:description" content="Corrección ortográfica y gramatical, libre y sin suscripciones, en tu navegador.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://corrector.damosenelblanco.com/es.html">
+<meta property="og:image" content="https://corrector.damosenelblanco.com/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:locale" content="es_ES">
+<meta property="og:locale:alternate" content="ca_ES">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://corrector.damosenelblanco.com/og-image.png">
+<meta name="twitter:title" content="Corrector Català">
+<meta name="twitter:description" content="Corrección ortográfica y gramatical, libre y sin suscripciones, en tu navegador.">
 <meta name="theme-color" content="#c8102e">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="alternate" hreflang="ca" href="https://corrector.damosenelblanco.com/">
@@ -27,6 +36,26 @@
   --line: #e8e3da;
   --line-strong: #d8d3ca;
   --code-bg: #f0ede5;
+  --pre-bg: #1a1a1a;
+  --pre-ink: #f5f5f5;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --red: #e1364f;
+    --red-dark: #c8102e;
+    --red-soft: rgba(225, 54, 79, 0.14);
+    --bg: #16181d;
+    --paper: #1f2128;
+    --paper-warm: #232631;
+    --ink: #ebe7df;
+    --ink-soft: #c0bdb6;
+    --muted: #8a8780;
+    --line: #2c2f37;
+    --line-strong: #3a3d46;
+    --code-bg: #2a2d34;
+    --pre-bg: #0e1014;
+    --pre-ink: #e8e6e0;
+  }
 }
 * { box-sizing: border-box; }
 html { scroll-behavior: smooth; }
@@ -266,8 +295,8 @@ code {
   border-radius: 3px;
 }
 pre {
-  background: #1a1a1a;
-  color: #f5f5f5;
+  background: var(--pre-bg);
+  color: var(--pre-ink);
   padding: 18px 20px;
   border-radius: 8px;
   overflow-x: auto;
@@ -415,14 +444,14 @@ footer {
     <div class="footer-links">
       <a href="https://github.com/humbertblanco/correctorcatala">Código fuente (GitHub)</a>
       <span class="footer-sep">·</span>
-      <a href="https://github.com/humbertblanco/correctorcatala/blob/main/docs/PRIVACY.md">Privacidad</a>
+      <a href="/privacy.es.html">Privacidad</a>
       <span class="footer-sep">·</span>
       <a href="https://github.com/humbertblanco/correctorcatala/blob/main/docs/INSTALL_SERVER.md">Autoalojamiento</a>
       <span class="footer-sep">·</span>
       <a href="https://liberapay.com/correctorcatala">Donaciones</a>
     </div>
     <p class="agraiments">Construido sobre <a href="https://languagetool.org">LanguageTool</a> (LGPL 2.1). Reglas catalanas mantenidas por <a href="https://softcatala.org">Softcatalà</a> y la comunidad. Licencia del proyecto: <a href="https://github.com/humbertblanco/correctorcatala/blob/main/LICENSE">AGPLv3</a>.</p>
-    <p class="hosted">Alojado por <a href="https://damosenelblanco.com" target="_blank" rel="noopener">Damos en el Blanco</a>.</p>
+    <p class="hosted">Alojado y mantenido por <a href="https://damosenelblanco.com" target="_blank" rel="noopener">Damos en el Blanco</a> — agencia creativa y tecnológica en Barcelona.</p>
   </footer>
 
 </main>

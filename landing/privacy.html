@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="ca">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Política de privadesa — Corrector Català</title>
+<meta name="description" content="Política de privadesa del Corrector Català: quines dades es processen, qui és el responsable del tractament, i drets de l'usuari.">
+<meta name="theme-color" content="#c8102e">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<style>
+:root {
+  --red: #c8102e;
+  --red-dark: #a30d24;
+  --bg: #fbfaf6;
+  --paper: #ffffff;
+  --ink: #1a1a1a;
+  --ink-soft: #4a4a4a;
+  --muted: #6b6b6b;
+  --line: #e8e3da;
+  --line-strong: #d8d3ca;
+  --code-bg: #f0ede5;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #16181d;
+    --paper: #1f2128;
+    --ink: #e8e6e0;
+    --ink-soft: #c4c2bc;
+    --muted: #8a8a8a;
+    --line: #2c2f37;
+    --line-strong: #3a3d46;
+    --code-bg: #2a2d34;
+  }
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  font-size: 16px;
+  line-height: 1.65;
+  color: var(--ink);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+}
+main { max-width: 720px; margin: 0 auto; padding: 56px 24px 80px; }
+h1 { font-size: 36px; margin: 0 0 8px; font-weight: 800; letter-spacing: -0.015em; }
+h2 { font-size: 22px; margin: 40px 0 12px; font-weight: 700; color: var(--red); }
+h3 { font-size: 17px; margin: 24px 0 8px; font-weight: 600; }
+p, li { color: var(--ink-soft); margin: 0 0 12px; }
+.lede { font-size: 17px; color: var(--ink); margin-top: 4px; }
+.meta { font-size: 13px; color: var(--muted); margin: 4px 0 36px; }
+ul { padding-left: 22px; margin: 0 0 16px; }
+li { margin: 4px 0; }
+code, kbd {
+  font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+  background: var(--code-bg);
+  padding: 1px 5px;
+  border-radius: 3px;
+  font-size: 0.92em;
+}
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 16px 0;
+  font-size: 14.5px;
+}
+th, td {
+  border-bottom: 1px solid var(--line);
+  padding: 10px 12px;
+  text-align: left;
+  vertical-align: top;
+  color: var(--ink-soft);
+}
+th { font-weight: 600; color: var(--ink); background: var(--code-bg); }
+a { color: var(--red); text-decoration-thickness: 1.5px; text-underline-offset: 2px; }
+a:hover { color: var(--red-dark); }
+.highlight {
+  background: #fae6e8;
+  border-left: 3px solid var(--red);
+  padding: 14px 18px;
+  margin: 20px 0;
+  border-radius: 0 6px 6px 0;
+  color: var(--ink);
+}
+@media (prefers-color-scheme: dark) { .highlight { background: rgba(200, 16, 46, 0.08); color: var(--ink); } }
+nav.lang-toggle {
+  display: inline-flex;
+  font-size: 13px;
+  margin-bottom: 24px;
+  border: 1px solid var(--line-strong);
+  border-radius: 6px;
+  overflow: hidden;
+}
+nav.lang-toggle a {
+  padding: 5px 12px;
+  color: var(--muted);
+  text-decoration: none;
+  font-weight: 500;
+}
+nav.lang-toggle a.active { background: var(--ink); color: var(--bg); }
+footer {
+  margin-top: 60px;
+  padding-top: 24px;
+  border-top: 1px solid var(--line);
+  font-size: 13px;
+  color: var(--muted);
+}
+footer a { color: var(--muted); text-decoration: none; }
+footer a:hover { color: var(--red); }
+.back { display: inline-block; margin-top: 12px; }
+</style>
+</head>
+<body>
+<main>
+
+  <nav class="lang-toggle">
+    <a href="/" class="active">Català</a>
+    <a href="/privacy.es.html">Castellano</a>
+  </nav>
+
+  <h1>Política de privadesa</h1>
+  <p class="meta">Versió 1.0 · Vigent des del 8 de maig de 2026</p>
+
+  <p class="lede">Aquest document explica de forma directa quines dades processa el Corrector Català i el seu servei <code>corrector.damosenelblanco.com</code>, qui les processa, durant quant de temps i amb quina finalitat.</p>
+
+  <h2>Què s'envia al servidor quan fas servir l'extensió o el demo</h2>
+
+  <p>Quan escrius en una caixa de text d'una pàgina web amb l'extensió activada, o quan provés el demo de la pàgina d'inici, el text que escrius (o el text que enganxes) s'envia al servidor de correcció (per defecte, <code>https://corrector.damosenelblanco.com</code>) per HTTPS. El servidor el processa amb el motor LanguageTool i retorna els errors trobats. La resposta es processa al teu navegador per dibuixar els subratllats.</p>
+
+  <div class="highlight">
+    <strong>El servidor no emmagatzema els teus textos ni les correccions.</strong> Cap còpia es desa, ni en disc ni en memòria persistent. Un cop la petició s'ha processat, el text desapareix.
+  </div>
+
+  <h2>Logs tècnics</h2>
+
+  <p>El servidor (nginx) registra peticions tècniques en logs estàndard amb la finalitat de detectar abusos i debugar errors. Aquests logs contenen:</p>
+  <ul>
+    <li>L'adreça IP que ha fet la petició</li>
+    <li>L'hora exacta</li>
+    <li>El mètode HTTP, la ruta i el codi de resposta</li>
+    <li>La mida del cos de la petició (no el contingut)</li>
+    <li>L'agent d'usuari del navegador</li>
+  </ul>
+  <p>No conté cap text que hagis enviat per corregir. Els logs es retenen <strong>un màxim de 30 dies</strong> i després es purguen automàticament.</p>
+
+  <h2>Què emmagatzema l'extensió al teu navegador</h2>
+
+  <p>L'extensió guarda algunes preferències a través de <code>chrome.storage.sync</code>, que es sincronitza entre dispositius del mateix usuari de Chrome:</p>
+  <ul>
+    <li>Si està activada o no</li>
+    <li>La variant de català escollida (general, valencià, balear, castellà o "auto")</li>
+    <li>L'URL del servidor que utilitza</li>
+    <li>El teu diccionari personal (paraules a ignorar)</li>
+    <li>La llista de dominis on l'has desactivada</li>
+    <li>Per origen, la variant manual que has triat</li>
+    <li>Els hostnames on has descartat el toast d'editor no compatible</li>
+  </ul>
+  <p>Tot això es queda al teu navegador. No s'envia enlloc més. Pots esborrar-ho desinstal·lant l'extensió.</p>
+
+  <h2>Permisos del Chrome que demana l'extensió</h2>
+
+  <table>
+    <thead><tr><th>Permís</th><th>Per què</th></tr></thead>
+    <tbody>
+      <tr><td><code>storage</code></td><td>Per desar les teves preferències i el diccionari personal.</td></tr>
+      <tr><td><code>activeTab</code></td><td>Per saber el domini de la pestanya actual quan cliques "Desactiva en aquest domini" o "Obre text al corrector web".</td></tr>
+      <tr><td><code>contextMenus</code></td><td>Reservat per a futures opcions del menú contextual del navegador (avui no s'utilitza).</td></tr>
+      <tr><td><code>scripting</code></td><td>Per injectar el script de correcció a la pàgina activa quan el necessitis (és com s'obté la selecció per al botó "Obre al corrector web").</td></tr>
+      <tr><td><code>&lt;all_urls&gt;</code> (opcional)</td><td>Per activar el corrector a tots els llocs. <strong>És opcional</strong>: pots no concedir-lo i activar-lo només a llocs concrets.</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Tercers</h2>
+  <p>El Corrector Català <strong>no fa servir cap analítica, traçador, ni servei publicitari de tercers</strong>. No hi ha Google Analytics, ni Facebook Pixel, ni cookies de marca, ni res equivalent. La pàgina d'inici i l'extensió no carreguen recursos externs (cap font de Google, cap CDN).</p>
+  <p>L'únic tercer al qual viatgen dades és el servidor de LanguageTool que tu hagis configurat. Per defecte és el que mantenim nosaltres a <code>corrector.damosenelblanco.com</code>; pots posar-ne un altre (el teu propi) a la pàgina d'opcions de l'extensió.</p>
+
+  <h2>Responsable del tractament</h2>
+  <p>El servidor <code>corrector.damosenelblanco.com</code> el manté i opera <a href="https://damosenelblanco.com" target="_blank" rel="noopener">Damos en el Blanco</a>, una agència creativa i tecnològica amb seu a Barcelona. El correu de contacte per a qualsevol qüestió relacionada amb la privadesa és <a href="mailto:hola@damosenelblanco.com">hola@damosenelblanco.com</a>.</p>
+
+  <h2>Drets de l'usuari</h2>
+  <p>Com que no recopilem dades personals identificables, no tenim cap registre teu a esborrar a una base de dades. Si ens ho demanes, podem purgar les entrades de log on apareix la teva IP enviant un correu a la direcció anterior. La supressió es fa en un termini màxim de 7 dies hàbils.</p>
+
+  <h2>Canvis a aquesta política</h2>
+  <p>Si canvia, ho publicarem aquí amb una nova data al capçal i, per a canvis substantius, anunciarem el canvi a la pàgina d'inici i al README del repositori a <a href="https://github.com/humbertblanco/correctorcatala">github.com/humbertblanco/correctorcatala</a>.</p>
+
+  <p class="back"><a href="/">← Torna a la pàgina d'inici</a></p>
+
+  <footer>
+    <p>Codi font: <a href="https://github.com/humbertblanco/correctorcatala">github.com/humbertblanco/correctorcatala</a> · Llicència <a href="https://github.com/humbertblanco/correctorcatala/blob/main/LICENSE">AGPLv3</a> · Hostatjat per <a href="https://damosenelblanco.com" target="_blank" rel="noopener">Damos en el Blanco</a></p>
+  </footer>
+
+</main>
+</body>
+</html>

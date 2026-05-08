@@ -41,6 +41,7 @@ export type MessageKey =
   | 'toast_unsupported_body'
   | 'toast_open_web'
   | 'toast_dismiss'
+  | 'toast_offline_body'
   | 'popup_open_corrector_web';
 
 export function t(key: MessageKey, ...substitutions: string[]): string {
