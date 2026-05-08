@@ -36,7 +36,12 @@ export type MessageKey =
   | 'error_offline'
   | 'error_unsupported_editor'
   | 'error_rate_limited'
-  | 'donate_url';
+  | 'donate_url'
+  | 'toast_unsupported_title'
+  | 'toast_unsupported_body'
+  | 'toast_open_web'
+  | 'toast_dismiss'
+  | 'popup_open_corrector_web';
 
 export function t(key: MessageKey, ...substitutions: string[]): string {
   const result = chrome.i18n.getMessage(key, substitutions);

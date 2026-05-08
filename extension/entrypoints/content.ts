@@ -2,9 +2,20 @@ import { defineContentScript } from 'wxt/utils/define-content-script';
 import { createAdapter, EDITOR_SELECTOR, type EditorAdapter } from '../lib/editors';
 import { detectVariant } from '../lib/dialect-detect';
 import { sendToBackground } from '../lib/messaging';
-import { getSettings, isDomainDisabled, onSettingsChanged, resolveVariant } from '../lib/settings';
+import { getSettings, isDomainDisabled, onSettingsChanged, resolveVariant, setSettings } from '../lib/settings';
 import { SuggestionCard } from '../components/SuggestionCard';
+import { Toast } from '../components/Toast';
+import { t } from '../lib/i18n';
 import type { LtMatch, Message, ResolvedVariant, Settings } from '../lib/types';
+
+// Pages where the document body is rendered as canvas / a sandboxed iframe and
+// no Chrome extension can intercept text. We surface a friendly toast on these
+// instead of failing silently.
+const UNSUPPORTED_HOSTS: RegExp[] = [
+  /^docs\.google\.com$/,            // Google Docs / Sheets / Slides
+  /^(www\.)?notion\.so$/,           // Notion main editor (canvas)
+  /^[^.]+\.notion\.site$/,          // Notion published sites with editor
+];
 
 const DEBOUNCE_MS = 700;
 const MIN_TEXT_LEN = 4;
@@ -250,6 +261,32 @@ export default defineContentScript({
     // If the page already has an editor focused at script-load time
     // (e.g. extension reload while user was typing), pick it up now.
     if (document.activeElement) maybeAttachOnFocus(document.activeElement);
+
+    // ---- Unsupported-page toast --------------------------------------------
+    // Surface a one-time toast on hosts we know we can't help (Google Docs,
+    // Notion). Skipped if the user has dismissed this host before.
+    if (UNSUPPORTED_HOSTS.some(re => re.test(location.hostname))) {
+      const host = location.hostname.toLowerCase();
+      if (!currentSettings.dismissedToasts.includes(host)) {
+        // Wait a few seconds in case the page does eventually expose a
+        // [contenteditable] we can attach to (some Notion templates do).
+        window.setTimeout(() => {
+          if (adapters.size > 0) return; // we found something; never mind.
+          const webBase = currentSettings.serverUrl.replace(/\/+$/, '');
+          new Toast({
+            title: t('toast_unsupported_title'),
+            body: t('toast_unsupported_body'),
+            primaryHref: `${webBase}/`,
+            primaryLabel: t('toast_open_web'),
+            onDismiss: () => {
+              const fresh = new Set(currentSettings.dismissedToasts);
+              fresh.add(host);
+              void setSettings({ dismissedToasts: [...fresh] });
+            },
+          });
+        }, 3_500);
+      }
+    }
 
     // ---- Cleanup observer (removed nodes only) -----------------------------
     // We still need to know when an attached editor's host element leaves the

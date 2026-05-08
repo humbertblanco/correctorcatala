@@ -23,10 +23,13 @@ class TextareaAdapter implements EditorAdapter {
   private matches: LtMatch[] = [];
   private inputListener: () => void;
   private scrollListener: () => void;
+  private scrollRaf: number | null = null;
   private resizeObserver: ResizeObserver;
   private textChangeCallbacks = new Set<() => void>();
   private matchClickCallbacks = new Set<(idx: number, rect: DOMRect) => void>();
   private destroyed = false;
+  private renderTimer: number | null = null;
+  private static readonly RENDER_DEBOUNCE_MS = 80;
 
   constructor(el: HTMLTextAreaElement | HTMLInputElement) {
     this.element = el;
@@ -66,15 +69,20 @@ class TextareaAdapter implements EditorAdapter {
     this.render();
 
     this.inputListener = () => {
-      this.render();
+      this.scheduleRender();
       for (const cb of this.textChangeCallbacks) cb();
     };
     el.addEventListener('input', this.inputListener);
     el.addEventListener('change', this.inputListener);
 
+    // Scroll fires very frequently on long textareas. Coalesce sync via rAF.
     this.scrollListener = () => {
-      this.mirror.scrollTop = el.scrollTop;
-      this.mirror.scrollLeft = el.scrollLeft;
+      if (this.scrollRaf != null) return;
+      this.scrollRaf = window.requestAnimationFrame(() => {
+        this.scrollRaf = null;
+        this.mirror.scrollTop = el.scrollTop;
+        this.mirror.scrollLeft = el.scrollLeft;
+      });
     };
     el.addEventListener('scroll', this.scrollListener, { passive: true });
 
@@ -92,7 +100,15 @@ class TextareaAdapter implements EditorAdapter {
 
   setMatches(matches: LtMatch[]): void {
     this.matches = matches;
-    this.render();
+    this.scheduleRender();
+  }
+
+  private scheduleRender(): void {
+    if (this.renderTimer != null) return;
+    this.renderTimer = window.setTimeout(() => {
+      this.renderTimer = null;
+      if (!this.destroyed) this.render();
+    }, TextareaAdapter.RENDER_DEBOUNCE_MS);
   }
 
   applyReplacement(offset: number, length: number, value: string): void {
@@ -127,6 +143,8 @@ class TextareaAdapter implements EditorAdapter {
   destroy(): void {
     if (this.destroyed) return;
     this.destroyed = true;
+    if (this.renderTimer) window.clearTimeout(this.renderTimer);
+    if (this.scrollRaf) window.cancelAnimationFrame(this.scrollRaf);
     this.element.removeEventListener('input', this.inputListener);
     this.element.removeEventListener('change', this.inputListener);
     this.element.removeEventListener('scroll', this.scrollListener);

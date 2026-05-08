@@ -43,6 +43,8 @@ export interface Settings {
   customDict: string[];
   disabledDomains: string[];
   perOriginVariant: Partial<Record<string, ResolvedVariant>>;
+  /** Hostnames where the "this editor isn't supported" toast has been dismissed. */
+  dismissedToasts: string[];
 }
 
 export type Message =

@@ -52,8 +52,9 @@ function pointToOffset(
   el: Element,
   x: number,
   y: number,
+  cachedNodes?: { node: Text; start: number; end: number }[],
 ): number | null {
-  const { nodes } = flattenText(el);
+  const nodes = cachedNodes ?? flattenText(el).nodes;
   // Try caretPositionFromPoint (newer) then caretRangeFromPoint (Chromium legacy).
   type DocWithCaretPos = Document & { caretPositionFromPoint?: (x: number, y: number) => { offsetNode: Node; offset: number } | null };
   const docWith = document as DocWithCaretPos;
@@ -96,6 +97,10 @@ class ContentEditableAdapter implements EditorAdapter {
   private highlight: Highlight | null = null;
   private renderTimer: number | null = null;
   private changeTimer: number | null = null;
+  // Cached flatten of the editor's text. Avoids re-walking the DOM on each
+  // getText() / click / replace within a single debounce window. Cleared by
+  // scheduleRender() (i.e., whenever the DOM might have changed).
+  private flatCache: { text: string; nodes: { node: Text; start: number; end: number }[] } | null = null;
 
   constructor(el: HTMLElement) {
     this.element = el;
@@ -122,9 +127,9 @@ class ContentEditableAdapter implements EditorAdapter {
     this.observer.observe(el, { childList: true, characterData: true, subtree: true });
 
     this.clickListener = (e) => {
-      const offset = pointToOffset(el, e.clientX, e.clientY);
+      const flat = this.getFlat();
+      const offset = pointToOffset(el, e.clientX, e.clientY, flat.nodes);
       if (offset == null) return;
-      // Find smallest match containing offset
       let bestIdx = -1;
       let bestLen = Number.POSITIVE_INFINITY;
       this.matches.forEach((m, i) => {
@@ -137,8 +142,7 @@ class ContentEditableAdapter implements EditorAdapter {
       });
       if (bestIdx === -1) return;
       const m = this.matches[bestIdx]!;
-      const { nodes } = flattenText(el);
-      const range = offsetToRange(m.offset, m.length, nodes);
+      const range = offsetToRange(m.offset, m.length, flat.nodes);
       if (!range) return;
       const rect = range.getBoundingClientRect();
       for (const cb of this.matchClickCallbacks) cb(bestIdx, rect);
@@ -146,8 +150,14 @@ class ContentEditableAdapter implements EditorAdapter {
     el.addEventListener('click', this.clickListener);
   }
 
+  private getFlat(): { text: string; nodes: { node: Text; start: number; end: number }[] } {
+    if (this.flatCache) return this.flatCache;
+    this.flatCache = flattenText(this.element);
+    return this.flatCache;
+  }
+
   getText(): string {
-    return flattenText(this.element).text;
+    return this.getFlat().text;
   }
 
   setMatches(matches: LtMatch[]): void {
@@ -156,9 +166,11 @@ class ContentEditableAdapter implements EditorAdapter {
   }
 
   applyReplacement(offset: number, length: number, value: string): void {
-    const { nodes } = flattenText(this.element);
-    const range = offsetToRange(offset, length, nodes);
+    const flat = this.getFlat();
+    const range = offsetToRange(offset, length, flat.nodes);
     if (!range) return;
+    // Mutating the DOM invalidates the cache.
+    this.flatCache = null;
     range.deleteContents();
     range.insertNode(document.createTextNode(value));
     // Move caret to end of insertion
@@ -197,6 +209,10 @@ class ContentEditableAdapter implements EditorAdapter {
   }
 
   private scheduleRender(): void {
+    // The DOM may have changed; invalidate cache eagerly so getText() and
+    // click hit-testing don't return stale offsets between scheduleRender()
+    // and the actual render().
+    this.flatCache = null;
     if (this.renderTimer != null) return;
     this.renderTimer = window.setTimeout(() => {
       this.renderTimer = null;
@@ -219,7 +235,7 @@ class ContentEditableAdapter implements EditorAdapter {
       this.clearHighlight();
       return;
     }
-    const { nodes } = flattenText(this.element);
+    const { nodes } = this.getFlat();
     const ranges: Range[] = [];
     for (const m of this.matches) {
       const r = offsetToRange(m.offset, m.length, nodes);

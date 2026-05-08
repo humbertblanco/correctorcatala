@@ -159,5 +159,25 @@
   "donate_url": {
     "message": "https://liberapay.com/correctorcatala",
     "description": "URL de donacions (configurable)"
+  },
+  "toast_unsupported_title": {
+    "message": "Aquí no puc subratllar",
+    "description": "Toast: editor no compatible (canvas, iframe aïllat, etc.)"
+  },
+  "toast_unsupported_body": {
+    "message": "Aquesta pàgina renderitza el text d'una manera que cap extensió pot interceptar (Google Docs, Notion). Pots fer servir el corrector copiant-enganxant el text al web.",
+    "description": "Toast body explaining the limitation"
+  },
+  "toast_open_web": {
+    "message": "Obre el corrector al web",
+    "description": "Toast button: open the web demo"
+  },
+  "toast_dismiss": {
+    "message": "Entesos",
+    "description": "Toast: dismiss button"
+  },
+  "popup_open_corrector_web": {
+    "message": "Obre text al corrector web",
+    "description": "Popup button to open the current selection in the web demo"
   }
 }

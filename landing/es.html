@@ -434,6 +434,15 @@ const sel = $('demo-variant');
 const out = $('demo-result');
 const status = $('demo-status');
 
+// Prefill from ?text= URL parameter (used by the extension's "Obre text al
+// corrector web" button to deep-link the user's selection).
+const _params = new URLSearchParams(location.search);
+const _prefill = _params.get('text');
+if (_prefill) {
+  ta.value = _prefill.slice(0, 5000);
+  setTimeout(() => $('prueba')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
+}
+
 let timer = 0;
 let lastReq = 0;
 let currentMatches = [];

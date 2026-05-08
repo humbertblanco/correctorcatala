@@ -7,6 +7,7 @@ export const DEFAULT_SETTINGS: Settings = {
   customDict: [],
   disabledDomains: [],
   perOriginVariant: {},
+  dismissedToasts: [],
 };
 
 const KEYS: (keyof Settings)[] = [
@@ -16,6 +17,7 @@ const KEYS: (keyof Settings)[] = [
   'customDict',
   'disabledDomains',
   'perOriginVariant',
+  'dismissedToasts',
 ];
 
 export async function getSettings(): Promise<Settings> {
@@ -55,6 +57,8 @@ function sanitize(s: Settings): Settings {
   if (typeof s.perOriginVariant !== 'object' || s.perOriginVariant === null) {
     s.perOriginVariant = {};
   }
+  if (!Array.isArray(s.dismissedToasts)) s.dismissedToasts = [];
+  s.dismissedToasts = s.dismissedToasts.map(h => h.trim().toLowerCase()).filter(Boolean);
   return s;
 }
 

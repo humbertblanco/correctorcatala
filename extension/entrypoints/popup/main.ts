@@ -16,6 +16,7 @@ async function init(): Promise<void> {
   const enabledInput = document.getElementById('enabled') as HTMLInputElement;
   const variantSelect = document.getElementById('variant') as HTMLSelectElement;
   const disableDomainBtn = document.getElementById('disable-domain') as HTMLButtonElement;
+  const openWebBtn = document.getElementById('open-web') as HTMLButtonElement;
   const openOptionsLink = document.getElementById('open-options') as HTMLAnchorElement;
   const donateLink = document.getElementById('donate') as HTMLAnchorElement;
 
@@ -51,6 +52,30 @@ async function init(): Promise<void> {
     }
     disableDomainBtn.textContent = `✓ ${host}`;
     disableDomainBtn.disabled = true;
+  });
+
+  openWebBtn.addEventListener('click', async () => {
+    const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
+    const tab = tabs[0];
+    let selected = '';
+    if (tab?.id) {
+      try {
+        const results = await chrome.scripting.executeScript({
+          target: { tabId: tab.id },
+          func: () => window.getSelection()?.toString() ?? '',
+        });
+        selected = results?.[0]?.result ?? '';
+      } catch {
+        // executeScript can fail on chrome:// or restricted pages — open empty.
+      }
+    }
+    const settings = await getSettings();
+    const base = settings.serverUrl.replace(/\/+$/, '');
+    const url = selected
+      ? `${base}/?text=${encodeURIComponent(selected.slice(0, 4000))}`
+      : `${base}/`;
+    await chrome.tabs.create({ url });
+    window.close();
   });
 
   openOptionsLink.addEventListener('click', (e) => {

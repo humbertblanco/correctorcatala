@@ -58,7 +58,7 @@ const STYLES = /* css */ `
 export class SuggestionCard {
   private host: HTMLDivElement;
   private root: ShadowRoot;
-  private outsideClickListener: (e: MouseEvent) => void;
+  private listenerAbort: AbortController;
   private hidden = true;
 
   constructor() {
@@ -75,13 +75,20 @@ export class SuggestionCard {
     style.textContent = STYLES;
     this.root.appendChild(style);
 
-    this.outsideClickListener = (e) => {
-      if (this.hidden) return;
-      const path = e.composedPath();
-      if (path.includes(this.host)) return;
-      this.hide();
-    };
-    document.addEventListener('click', this.outsideClickListener, true);
+    // Outside-click handler installed on document with capture. Using
+    // AbortController so destroy() guarantees removal even on SPA tear-downs
+    // where we might miss a manual remove.
+    this.listenerAbort = new AbortController();
+    document.addEventListener(
+      'click',
+      (e) => {
+        if (this.hidden) return;
+        const path = e.composedPath();
+        if (path.includes(this.host)) return;
+        this.hide();
+      },
+      { capture: true, signal: this.listenerAbort.signal },
+    );
   }
 
   show(match: LtMatch, anchor: DOMRect, actions: SuggestionCardActions): void {
@@ -182,7 +189,7 @@ export class SuggestionCard {
   }
 
   destroy(): void {
-    document.removeEventListener('click', this.outsideClickListener, true);
+    this.listenerAbort.abort();
     this.host.remove();
   }
 }
